@@ -1,6 +1,6 @@
 ---
 name: product-discovery-and-specs
-description: "Run product discovery, frontier design-tree grilling, Jobs-to-be-Done framing, PRDs, explicit non-goals, domain glossaries, structured use cases, vertical feature breakdowns, acceptance criteria, and quantitative NFR/SLO budgets. Use during Spiral Q1/Q2/Q4 or when defining scope before architecture."
+description: "Run structured app/web ideation (Double Diamond, Crazy 8s, SCAMPER, Value Proposition, RAT), product discovery/JTBD, frontier grilling, PRDs, non-goals, use cases, feature breakdowns, and quantitative NFR/SLO budgets. Use during Spiral Q1/Q2/Q4 or before architecture."
 license: MIT
 metadata:
   suite: appnwebsite-skill
@@ -13,7 +13,7 @@ metadata:
 
 Convert fuzzy product ideas into falsifiable requirements, vertical slices, and measurable reliability/cost budgets **before** system architecture (Phase 3A) or coding (Phase 3B) begins.
 
-> **Progressive Disclosure Rule**: Read ONLY the single reference module and template needed for the active Spiral stage or task below. NEVER bulk-load all four reference modules simultaneously.
+> **Progressive Disclosure Rule**: Read ONLY the single reference module and template needed for the active Spiral stage or task below. NEVER bulk-load all five reference modules simultaneously.
 
 ---
 
@@ -33,6 +33,7 @@ Convert fuzzy product ideas into falsifiable requirements, vertical slices, and 
 
 | Active Need / Spiral Q1–Q4 Task | Load Reference (`references/`) | Output Template (`templates/`) | Canonical Output (`docs/product/`) |
 |---|---|---|---|
+| Concept brainstorming, Double Diamond, Crazy 8s, SCAMPER, white-space, RAT | [product-ideation-and-brainstorming.md](references/product-ideation-and-brainstorming.md) | [ideation-workshop-brief.md](templates/ideation-workshop-brief.md) | `docs/product/ideation-brief.md` |
 | Problem framing, JTBD, personas, OST, narrowest wedge, frontier grilling | [product-discovery-and-jtbd.md](references/product-discovery-and-jtbd.md) | [prd-spec.md](templates/prd-spec.md) *(Section 1)* | `docs/product/prd.md` *(Section 1)* |
 | PRDs, `FR-NNN`, implicit behaviors, `NG-NNN` non-goals, `GLOSSARY.md`, edge matrix | [prd-and-functional-specs.md](references/prd-and-functional-specs.md) | [prd-spec.md](templates/prd-spec.md) *(Sections 2–6)* | `docs/product/prd.md` + `docs/product/GLOSSARY.md` |
 | `UC-NNN` main/alt/exception flows, vertical `EP-NNN`, `ST-NNN` stories, ACs | [use-cases-and-feature-breakdown.md](references/use-cases-and-feature-breakdown.md) | [use-case-spec.md](templates/use-case-spec.md) | `docs/product/use-cases.md` + `docs/product/feature-breakdown.md` |

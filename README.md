@@ -23,7 +23,7 @@ appnwebsite-skill/
 | Skill ID | Role / Domain | Milestone | Status |
 |---|---|---|---|
 | `appnwebsite-orchestrator` ([SKILL.md](SKILL.md)) | Parent Spiral Router, Phase 3A & Simplicity Enforcer | M1 | `active` |
-| `product-discovery-and-specs` (`skills/product-discovery-and-specs/`) | Product discovery/JTBD, PRDs, use cases, slices, quantitative NFRs/SLOs | M2 | `active` |
+| `product-discovery-and-specs` (`skills/product-discovery-and-specs/`) | Ideation/brainstorming (Double Diamond, Crazy 8s, SCAMPER, RAT), discovery/JTBD, PRDs, use cases, quantitative NFRs/SLOs | M2 | `active` |
 | `system-data-architecture` (`skills/system-data-architecture/`) | Greenfield C4 architecture, ADRs, Control Manifest, DDD/ERD, expand-contract migrations, GDPR/DPIA | M2 | `active` |
 | `fullstack-api-engineering` (`skills/fullstack-api-engineering/`) | Clean backend & durable workflows, SSR/RSC frontend, OpenAPI/GraphQL/gRPC/Webhooks, i18n/l10n, code review | M2 | `active` |
 | `ui-design-craft` (`skills/ui-design-craft/`) | UX/IA, typography & `clamp()`, grids & ergonomics, OKLCH/APCA & W3C tokens, motion, strict Anti-AI-Slop | M3 | `active` |

@@ -73,7 +73,7 @@ All 11 Child Skills live under `skills/<name>/` (all 11 `status: "active"` in [R
 
 | Surface / Lifecycle Domain | Spiral Stage(s) | Target Child Skill(s) (`skills/<name>/`) | Quick CLI Lookup |
 |---|---|---|---|
-| **Product Discovery, PRDs, Use Cases, NFRs** | `Q1`, `Q2`, `Q4` | `skills/product-discovery-and-specs/` | `python3 scripts/query_skill.py --skill product-discovery-and-specs` |
+| **Ideation, Brainstorming, Discovery, PRDs, Use Cases, NFRs** | `Q1`, `Q2`, `Q4` | `skills/product-discovery-and-specs/` | `python3 scripts/query_skill.py --skill product-discovery-and-specs` |
 | **Greenfield Architecture, ADRs, Data/ERD, Privacy** | `Q2`, `3A` | `skills/system-data-architecture/` | `python3 scripts/query_skill.py --skill system-data-architecture` |
 | **Backend / API / Full-Stack / i18n / Code Review** | `3A`, `3B`, `3C` | `skills/fullstack-api-engineering/` | `python3 scripts/query_skill.py --surface backend-api --stage 3b` |
 | **UI Design Craft, Typography, OKLCH, Anti-AI-Slop** | `3A`, `3B`, `3C` | `skills/ui-design-craft/` | `python3 scripts/query_skill.py --surface design-system --stage 3a` |

@@ -63,6 +63,14 @@
         "fullstack"
       ],
       "triggers": [
+        "brainstorm",
+        "ideation",
+        "crazy 8s",
+        "scamper",
+        "double diamond",
+        "value proposition",
+        "hmw",
+        "idea validation",
         "prd",
         "product discovery",
         "jtbd",
@@ -84,12 +92,13 @@
         "simplicity-interrogation-record.md"
       ],
       "outputs": [
+        "ideation-brief.md",
         "prd.md",
         "use-cases.md",
         "feature-breakdown.md",
         "nfr-slo-matrix.md"
       ],
-      "estimated_tokens": 1232,
+      "estimated_tokens": 1272,
       "entry_script": null,
       "status": "active"
     },
