@@ -1,0 +1,674 @@
+{
+  "schema_version": "1.0.0",
+  "suite_name": "appnwebsite-skill",
+  "suite_version": "1.0.0",
+  "author": "nambuw",
+  "license": "MIT",
+  "repository": "https://github.com/NamBuw/appnwebsite-skill",
+  "rigor_tiers": [
+    "minimal",
+    "standard",
+    "full"
+  ],
+  "verdict_precedence": [
+    "FAIL",
+    "CONCERNS",
+    "NOT ASSESSED",
+    "PASS"
+  ],
+  "parent": {
+    "id": "appnwebsite-orchestrator",
+    "name": "appnwebsite-orchestrator",
+    "path": ".",
+    "skill_file": "SKILL.md",
+    "estimated_tokens": 2056,
+    "active_child_ceiling": 2,
+    "references": [
+      "references/orchestration-protocol.md",
+      "references/00-spiral-governance/spiral-lifecycle.md",
+      "references/00-spiral-governance/system-first-foundation-gate.md",
+      "references/00-spiral-governance/anti-overengineering-simplicity-gate.md",
+      "references/00-spiral-governance/token-economy-and-progressive-disclosure.md",
+      "references/00-spiral-governance/risk-prototyping-and-spikes.md"
+    ],
+    "scripts": [
+      "scripts/validate_skill.py",
+      "scripts/query_skill.py",
+      "scripts/check_spiral_gates.py"
+    ],
+    "templates": [
+      "templates/spiral-charter.md",
+      "templates/system-foundation-gate.md",
+      "templates/simplicity-interrogation-record.md",
+      "templates/risk-spike-register.md"
+    ]
+  },
+  "children": [
+    {
+      "id": "product-discovery-and-specs",
+      "name": "product-discovery-and-specs",
+      "path": "skills/product-discovery-and-specs",
+      "milestone": "M2",
+      "spiral_stages": [
+        "Q1",
+        "Q2",
+        "Q4"
+      ],
+      "surfaces": [
+        "landing-page",
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "backend-api",
+        "fullstack"
+      ],
+      "triggers": [
+        "prd",
+        "product discovery",
+        "jtbd",
+        "requirements",
+        "functional spec",
+        "use cases",
+        "user stories",
+        "epics",
+        "feature breakdown",
+        "acceptance criteria",
+        "nfr",
+        "slo",
+        "sla",
+        "scope"
+      ],
+      "depends_on": [],
+      "inputs": [
+        "spiral-charter.md",
+        "simplicity-interrogation-record.md"
+      ],
+      "outputs": [
+        "prd.md",
+        "use-cases.md",
+        "feature-breakdown.md",
+        "nfr-slo-matrix.md"
+      ],
+      "estimated_tokens": 1232,
+      "entry_script": null,
+      "status": "active"
+    },
+    {
+      "id": "system-data-architecture",
+      "name": "system-data-architecture",
+      "path": "skills/system-data-architecture",
+      "milestone": "M2",
+      "spiral_stages": [
+        "Q2",
+        "3A"
+      ],
+      "surfaces": [
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "backend-api",
+        "fullstack"
+      ],
+      "triggers": [
+        "system architecture",
+        "c4",
+        "adr",
+        "control manifest",
+        "domain model",
+        "ddd",
+        "erd",
+        "database schema",
+        "postgres",
+        "rls",
+        "migrations",
+        "expand-and-contract",
+        "privacy",
+        "gdpr",
+        "ccpa",
+        "dpia",
+        "data governance"
+      ],
+      "depends_on": [
+        "product-discovery-and-specs"
+      ],
+      "inputs": [
+        "spiral-charter.md",
+        "simplicity-interrogation-record.md",
+        "prd.md",
+        "nfr-slo-matrix.md"
+      ],
+      "outputs": [
+        "architecture.md",
+        "adr-decisions",
+        "control-manifest.md",
+        "data-model.md",
+        "migration-plan.md",
+        "dpia-privacy.md",
+        "system-foundation-gate.md"
+      ],
+      "estimated_tokens": 1371,
+      "entry_script": null,
+      "status": "active"
+    },
+    {
+      "id": "fullstack-api-engineering",
+      "name": "fullstack-api-engineering",
+      "path": "skills/fullstack-api-engineering",
+      "milestone": "M2",
+      "spiral_stages": [
+        "3A",
+        "3B",
+        "3C"
+      ],
+      "surfaces": [
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "backend-api",
+        "fullstack"
+      ],
+      "triggers": [
+        "backend",
+        "frontend",
+        "fullstack",
+        "nextjs",
+        "react",
+        "rsc",
+        "ssr",
+        "api design",
+        "openapi",
+        "rest",
+        "graphql",
+        "grpc",
+        "webhooks",
+        "rfc 9457",
+        "i18n",
+        "l10n",
+        "rtl",
+        "code review",
+        "refactoring",
+        "durable workflows"
+      ],
+      "depends_on": [
+        "system-data-architecture"
+      ],
+      "inputs": [
+        "system-foundation-gate.md",
+        "architecture.md",
+        "control-manifest.md",
+        "data-model.md",
+        "feature-breakdown.md"
+      ],
+      "outputs": [
+        "openapi-or-contracts",
+        "backend-services",
+        "frontend-routes",
+        "i18n-catalogs",
+        "code-review-log.md"
+      ],
+      "estimated_tokens": 1364,
+      "entry_script": null,
+      "status": "active"
+    },
+    {
+      "id": "ui-design-craft",
+      "name": "ui-design-craft",
+      "path": "skills/ui-design-craft",
+      "milestone": "M3",
+      "spiral_stages": [
+        "3A",
+        "3B",
+        "3C"
+      ],
+      "surfaces": [
+        "landing-page",
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "design-system",
+        "ui-redesign",
+        "fullstack"
+      ],
+      "triggers": [
+        "ui design",
+        "ux research",
+        "information architecture",
+        "typography",
+        "font pairing",
+        "clamp",
+        "grid",
+        "gestalt",
+        "oklch",
+        "apca",
+        "contrast",
+        "color palette",
+        "design tokens",
+        "motion",
+        "micro-interaction",
+        "anti-ai-slop",
+        "ux copy",
+        "accessibility"
+      ],
+      "depends_on": [
+        "product-discovery-and-specs"
+      ],
+      "inputs": [
+        "spiral-charter.md",
+        "prd.md",
+        "simplicity-interrogation-record.md"
+      ],
+      "outputs": [
+        "design-master.md",
+        "tokens.json",
+        "typography-grid-spec.md",
+        "anti-slop-audit.json"
+      ],
+      "estimated_tokens": 1146,
+      "entry_script": "skills/ui-design-craft/scripts/design_search.py",
+      "status": "active"
+    },
+    {
+      "id": "figma-design-to-code",
+      "name": "figma-design-to-code",
+      "path": "skills/figma-design-to-code",
+      "milestone": "M3",
+      "spiral_stages": [
+        "3A",
+        "3B",
+        "3C"
+      ],
+      "surfaces": [
+        "landing-page",
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "design-system",
+        "fullstack"
+      ],
+      "triggers": [
+        "figma",
+        "figma variables",
+        "auto layout",
+        "code connect",
+        "figma mcp",
+        "dtcg",
+        "style dictionary",
+        "design-to-code",
+        "redlines",
+        "visual parity",
+        "pixel faithful"
+      ],
+      "depends_on": [
+        "ui-design-craft",
+        "system-data-architecture"
+      ],
+      "inputs": [
+        "design-master.md",
+        "tokens.json",
+        "system-foundation-gate.md"
+      ],
+      "outputs": [
+        "figma-token-sync.json",
+        "code-connect-map",
+        "parity-components",
+        "visual-parity-report.md"
+      ],
+      "estimated_tokens": 1609,
+      "entry_script": null,
+      "status": "active"
+    },
+    {
+      "id": "frontend-surfaces-and-redesign",
+      "name": "frontend-surfaces-and-redesign",
+      "path": "skills/frontend-surfaces-and-redesign",
+      "milestone": "M3",
+      "spiral_stages": [
+        "3B",
+        "3C"
+      ],
+      "surfaces": [
+        "landing-page",
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "design-system",
+        "ui-redesign",
+        "fullstack"
+      ],
+      "triggers": [
+        "landing page",
+        "marketing site",
+        "hero",
+        "conversion copy",
+        "saas workspace",
+        "mobile app",
+        "expo",
+        "react native",
+        "swiftui",
+        "flutter",
+        "dashboard",
+        "data visualization",
+        "charts",
+        "design system",
+        "ui audit",
+        "redesign"
+      ],
+      "depends_on": [
+        "ui-design-craft",
+        "system-data-architecture"
+      ],
+      "inputs": [
+        "system-foundation-gate.md",
+        "design-master.md",
+        "tokens.json",
+        "openapi-or-contracts"
+      ],
+      "outputs": [
+        "surface-ui-implementation",
+        "design-system-kit",
+        "redesign-audit-report.md"
+      ],
+      "estimated_tokens": 1536,
+      "entry_script": null,
+      "status": "active"
+    },
+    {
+      "id": "security-engineering",
+      "name": "security-engineering",
+      "path": "skills/security-engineering",
+      "milestone": "M4",
+      "spiral_stages": [
+        "Q2",
+        "3A",
+        "3C",
+        "Q4"
+      ],
+      "surfaces": [
+        "landing-page",
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "backend-api",
+        "fullstack"
+      ],
+      "triggers": [
+        "security",
+        "threat model",
+        "stride",
+        "attack tree",
+        "oauth",
+        "pkce",
+        "webauthn",
+        "rbac",
+        "abac",
+        "rls",
+        "idor",
+        "xss",
+        "sqli",
+        "ssrf",
+        "csrf",
+        "sbom",
+        "slsa",
+        "secrets",
+        "sast",
+        "dast",
+        "pentest",
+        "poc"
+      ],
+      "depends_on": [
+        "system-data-architecture"
+      ],
+      "inputs": [
+        "architecture.md",
+        "data-model.md",
+        "openapi-or-contracts",
+        "backend-services",
+        "surface-ui-implementation"
+      ],
+      "outputs": [
+        "threat-model.md",
+        "security-baseline-report.json",
+        "security-audit-report.md",
+        "poc-verifications"
+      ],
+      "estimated_tokens": 1052,
+      "entry_script": "skills/security-engineering/scripts/check_security_baseline.py",
+      "status": "active"
+    },
+    {
+      "id": "multi-layer-qa-testing",
+      "name": "multi-layer-qa-testing",
+      "path": "skills/multi-layer-qa-testing",
+      "milestone": "M4",
+      "spiral_stages": [
+        "Q2",
+        "3B",
+        "3C",
+        "Q4"
+      ],
+      "surfaces": [
+        "landing-page",
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "design-system",
+        "ui-redesign",
+        "backend-api",
+        "fullstack"
+      ],
+      "triggers": [
+        "qa",
+        "testing",
+        "test strategy",
+        "test plan",
+        "black-box",
+        "equivalence partitioning",
+        "boundary value",
+        "state transition",
+        "decision table",
+        "pairwise",
+        "exploratory",
+        "e2e",
+        "uat",
+        "playwright",
+        "unit test",
+        "integration test",
+        "mutation testing",
+        "load test",
+        "k6",
+        "wcag",
+        "chaos",
+        "release gate"
+      ],
+      "depends_on": [
+        "product-discovery-and-specs",
+        "system-data-architecture"
+      ],
+      "inputs": [
+        "prd.md",
+        "use-cases.md",
+        "openapi-or-contracts",
+        "backend-services",
+        "surface-ui-implementation"
+      ],
+      "outputs": [
+        "test-strategy.md",
+        "black-box-test-matrix.md",
+        "automated-test-suites",
+        "nonfunctional-test-report.md",
+        "release-qa-verdict.md"
+      ],
+      "estimated_tokens": 717,
+      "entry_script": null,
+      "status": "active"
+    },
+    {
+      "id": "observability-sre-release",
+      "name": "observability-sre-release",
+      "path": "skills/observability-sre-release",
+      "milestone": "M5",
+      "spiral_stages": [
+        "3A",
+        "3C",
+        "Q4"
+      ],
+      "surfaces": [
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "backend-api",
+        "fullstack"
+      ],
+      "triggers": [
+        "observability",
+        "opentelemetry",
+        "otel",
+        "slo",
+        "burn rate",
+        "alerting",
+        "ci/cd",
+        "release engineering",
+        "canary",
+        "blue-green",
+        "rollback",
+        "changelog",
+        "runbook",
+        "incident",
+        "sev",
+        "postmortem",
+        "sre"
+      ],
+      "depends_on": [
+        "fullstack-api-engineering",
+        "multi-layer-qa-testing",
+        "security-engineering"
+      ],
+      "inputs": [
+        "nfr-slo-matrix.md",
+        "architecture.md",
+        "release-qa-verdict.md",
+        "security-audit-report.md"
+      ],
+      "outputs": [
+        "telemetry-slo-config.md",
+        "cicd-release-pipeline",
+        "operational-runbooks.md",
+        "changelog.md",
+        "postmortem-template.md"
+      ],
+      "estimated_tokens": 1715,
+      "entry_script": null,
+      "status": "active"
+    },
+    {
+      "id": "advanced-web-app-capabilities",
+      "name": "advanced-web-app-capabilities",
+      "path": "skills/advanced-web-app-capabilities",
+      "milestone": "EXP",
+      "spiral_stages": [
+        "Q2",
+        "3B",
+        "3C"
+      ],
+      "surfaces": [
+        "landing-page",
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "fullstack"
+      ],
+      "triggers": [
+        "payments",
+        "billing",
+        "stripe",
+        "webhook idempotency",
+        "ai feature",
+        "llm",
+        "prompt injection",
+        "realtime",
+        "websocket",
+        "offline-first",
+        "pwa",
+        "app store",
+        "seo",
+        "core web vitals",
+        "structured data",
+        "analytics",
+        "feature flags",
+        "experimentation",
+        "browser visual audit",
+        "mcp audit"
+      ],
+      "depends_on": [
+        "system-data-architecture",
+        "fullstack-api-engineering"
+      ],
+      "inputs": [
+        "system-foundation-gate.md",
+        "simplicity-interrogation-record.md",
+        "prd.md"
+      ],
+      "outputs": [
+        "capability-integration-spec.md",
+        "idempotency-state-machine",
+        "ai-guardrails-report.md",
+        "seo-cwv-audit.md"
+      ],
+      "estimated_tokens": 1574,
+      "entry_script": null,
+      "status": "active"
+    },
+    {
+      "id": "meta-plan-goal-teamwork",
+      "name": "meta-plan-goal-teamwork",
+      "path": "skills/meta-plan-goal-teamwork",
+      "milestone": "EXP",
+      "spiral_stages": [
+        "Q1",
+        "Q2",
+        "3A",
+        "3B",
+        "3C",
+        "Q4"
+      ],
+      "surfaces": [
+        "landing-page",
+        "web-app",
+        "mobile-app",
+        "dashboard",
+        "design-system",
+        "ui-redesign",
+        "backend-api",
+        "fullstack"
+      ],
+      "triggers": [
+        "/plan",
+        "/goal",
+        "/teamwork",
+        "plan-first",
+        "plan-first-execution",
+        "goal-completion",
+        "goal-completion-evidence-loop",
+        "evidence loop",
+        "teamwork",
+        "multi-agent",
+        "multi-agent-teamwork-orchestration",
+        "subagent orchestration",
+        "execution mode"
+      ],
+      "depends_on": [],
+      "inputs": [
+        "spiral-charter.md",
+        "simplicity-interrogation-record.md"
+      ],
+      "outputs": [
+        "execution-plan.md",
+        "goal-evidence-ledger.md",
+        "teamwork-handoff.md"
+      ],
+      "estimated_tokens": 1619,
+      "entry_script": null,
+      "status": "active"
+    }
+  ]
+}
