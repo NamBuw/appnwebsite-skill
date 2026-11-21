@@ -32,6 +32,7 @@ Load **only** the reference module required for your active subtask; never bulk-
 | Type pairings, `clamp()` math, `4/8/12`-col grids, `@container`, nested radius, Gestalt/Fitts/Hick/Miller | [references/typography-grids-and-ergonomics.md](references/typography-grids-and-ergonomics.md) | [templates/design-master.md](templates/design-master.md) | `scripts/design_search.py` |
 | OKLCH ramps, WCAG/APCA/CVD contrast, 3-tier DTCG tokens, 13 UI states, GPU motion | [references/color-contrast-tokens-motion.md](references/color-contrast-tokens-motion.md) | [templates/tokens-dtcg.schema.json](templates/tokens-dtcg.schema.json) | `scripts/check_contrast.py`, `scripts/validate_tokens.py` |
 | Anti-AI-slop policy, Site-Kind taxonomy, 26-pattern UX microcopy, design critique | [references/anti-ai-slop-and-ux-copy.md](references/anti-ai-slop-and-ux-copy.md) | [templates/design-master.md](templates/design-master.md) | `scripts/check_anti_slop.py` |
+| Curated `DESIGN.md` design-language blueprints (Editorial Culinary, Precision Dark, Tactile) | [references/design-languages.md](references/design-languages.md) | [templates/design-master.md](templates/design-master.md) | `scripts/design_search.py` |
 
 ---
 
@@ -66,7 +67,7 @@ Before introducing any styling framework, animation engine, or JS widget library
 - **Fonts:** Default ban on `Inter`, `Roboto`, `Arial`, `Open Sans`, and `Helvetica` (governed brownfield exception requires dated ADR + `--allow-font`).
 - **Icons:** Standardize on `Phosphor` (`@phosphor-icons/react`), `Solar`, or `Iconamoon`; ban `Lucide`, `Feather`, `Heroicons`, `Material Icons`, and `Material Symbols` by default (`--allow-icon` only with ADR).
 - **Surfaces & Stacking:** Flat intentional surfaces by default (hero text-only gradient with `background-clip: text` allowed); semantic z-index ladder `0..70` (`>= 999` banned); mandatory `@media (prefers-reduced-motion: reduce)`.
-- **Imagery, Brand Marks & Color Harmony:** Require real or art-directed raster photography (`<img>`/`<picture>`) in consumer/product heroes (`SLOP-HERO-NO-PHOTO`), ban hand-coded primitive inline `<svg>` logos in `.brand`/`.logo`/`.wordmark` (`SLOP-SVG-LOGO-01`), enforce 60-30-10 photography-coupled single-accent harmony (`SLOP-COLOR-HARMONY-01`), and inspect `1440px` + `390px` Playwright screenshots visually before release.
+- **Imagery, Brand Marks & Color Harmony:** Require real web/client photography (`<img>`/`<picture>`) in consumer/product heroes (`SLOP-HERO-NO-PHOTO`), ban AI-generated food/lifestyle photos (`SLOP-AI-IMAGE-01`) and hand-coded inline `<svg>` logos (`SLOP-SVG-LOGO-01`), strip AI copy clichés in EN/VI (`SLOP-COPY-01`), enforce 60-30-10 color harmony (`SLOP-COLOR-HARMONY-01`), and inspect `1440px` + `390px` Playwright screenshots visually before release.
 - **Mandatory Gate Commands:**
 
 ```bash

@@ -56,6 +56,16 @@ AI_BUZZWORD_PATTERNS: tuple[str, ...] = (
     r"\belevate\s+your\b",
     r"\bgame-chang(?:er|ing)\b",
     r"\bstate-of-the-art\b",
+    r"trích xuất từ kho",
+    r"\bchuẩn hóa\b",
+    r"\btrọn vị\b",
+    r"\bnhịp bếp\b",
+    r"\bnâng tầm\b",
+    r"\btối ưu hóa quy trình\b",
+)
+_AI_IMAGE_SLOP_RE = re.compile(
+    r"""\b(?:ai-generated|generated\s+by\s+ai|midjourney|dall-e|stable-diffusion|tastoria\s+studio)\b""",
+    re.IGNORECASE,
 )
 
 _FONT_DECL_RE = re.compile(
@@ -489,12 +499,21 @@ def scan_target(
                     reported_icons.add(icon_pkg)
                     add_finding("SLOP-ICON-01", "REFLEX", fpath, lineno, f"Banned icon pack {icon_pkg!r} detected", True)
 
-            # 3. SLOP-GRAD-01 (allow hero text-only directional clip)
+            # 3. SLOP-GRAD-01 (allow hero text-only directional clip OR neutral dark photo readability scrims)
             if _GRADIENT_RE.search(line):
-                ctx_start = max(0, lineno - 3)
+                ctx_start = max(0, lineno - 4)
                 ctx_end = min(len(lines), lineno + 3)
                 context_blob = "\n".join(lines[ctx_start:ctx_end]).lower()
-                if not any(clip in context_blob for clip in ("background-clip: text", "-webkit-background-clip: text", "bg-clip-text", "webkitbackgroundclip")):
+                is_text_clip = any(
+                    clip in context_blob
+                    for clip in ("background-clip: text", "-webkit-background-clip: text", "bg-clip-text", "webkitbackgroundclip")
+                )
+                is_neutral_photo_scrim = (
+                    ("scrim" in context_blob or "hero-overlay" in context_blob)
+                    and "rgba(" in line.lower()
+                    and not _INDIGO_SLOP_RE.search(context_blob)
+                )
+                if not is_text_clip and not is_neutral_photo_scrim:
                     add_finding("SLOP-GRAD-01", "REFLEX", fpath, lineno, "Background gradient without hero text-clip exception", True)
 
             # 4. SLOP-ZIDX-01
@@ -504,11 +523,14 @@ def scan_target(
                 if zval >= 999 or zval < 0:
                     add_finding("SLOP-ZIDX-01", "REFLEX", fpath, lineno, f"Out-of-scale z-index ({zval}); use semantic layer 0..70", True)
 
-            # 5. SLOP-COPY-01
+            # 5. SLOP-COPY-01 & SLOP-AI-IMAGE-01
             for pat in AI_BUZZWORD_PATTERNS:
                 mm = re.search(pat, line, re.IGNORECASE)
                 if mm:
                     add_finding("SLOP-COPY-01", "FLOOR", fpath, lineno, f"AI slop / placeholder copy detected: {mm.group(0)!r}", True)
+            aim = _AI_IMAGE_SLOP_RE.search(line)
+            if aim:
+                add_finding("SLOP-AI-IMAGE-01", "FLOOR", fpath, lineno, f"Synthetic AI image marker {aim.group(0)!r} detected; use authentic web/client photography", True)
 
             # 6. Default transition easing / transition: all / infinite animations / unthrottled scroll
             if is_css and _TRANSITION_ALL_RE.search(check_line):
@@ -590,7 +612,7 @@ def run_self_test() -> dict[str, Any]:
         bad_html.write_text(
             "<header><a class='wordmark'><svg width='28' height='28'><rect width='20' height='20'/></svg></a></header>\n"
             "<section id='hero' class='hero'><h1>Title</h1><svg width='180' height='120'><circle cx='60' cy='60' r='50'/></svg></section>\n"
-            "<span class='fresh-dot'></span><p>Val mAP@50 ONNX Runtime</p>\n"
+            "<span class='fresh-dot'></span><p>Val mAP@50 ONNX Runtime · midjourney ai-generated</p>\n"
             + "".join("<div class='card feature-icon'>x</div>" for _ in range(8)),
             encoding="utf-8",
         )
@@ -609,6 +631,7 @@ def run_self_test() -> dict[str, Any]:
         clean_css.parent.mkdir()
         clean_css.write_text(
             "body { font-family: 'Geist', sans-serif; background: #09090B; }\n"
+            ".hero-scrim { background: linear-gradient(180deg, rgba(18, 14, 11, 0) 0%, rgba(18, 14, 11, 0.78) 100%); }\n"
             ".btn { transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1); }\n"
             "@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }\n",
             encoding="utf-8",
@@ -632,7 +655,7 @@ def run_self_test() -> dict[str, Any]:
             and (not r_bad_tsx["passed"])
             and r_ok["passed"]
             and {"SLOP-FONT-01", "SLOP-DARK-01", "SLOP-COLOR-CLASH-01", "SLOP-COLOR-HARMONY-01", "SLOP-FAKE-DEVICE-01", "SLOP-ZIDX-01", "SLOP-MOTION-02", "SLOP-GLASS-01"}.issubset(rules_css)
-            and {"SLOP-DOT-01", "SLOP-COPY-02", "SLOP-WALL-CARDS-01", "SLOP-ICON-BOX-01", "SLOP-SVG-LOGO-01", "SLOP-HERO-NO-PHOTO"}.issubset(rules_html)
+            and {"SLOP-DOT-01", "SLOP-COPY-02", "SLOP-WALL-CARDS-01", "SLOP-ICON-BOX-01", "SLOP-SVG-LOGO-01", "SLOP-HERO-NO-PHOTO", "SLOP-AI-IMAGE-01"}.issubset(rules_html)
             and {"SLOP-PALETTE-01", "SLOP-RN-LAYOUT-01", "SLOP-EYEBROW-01", "SLOP-EMOJI-01", "SLOP-COPY-01"}.issubset(rules_tsx)
         )
         return {
