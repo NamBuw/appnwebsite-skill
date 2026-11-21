@@ -103,6 +103,25 @@ _INFINITE_ANIM_RE = re.compile(r"""\banimate-(?:bounce|ping)\b""", re.IGNORECASE
 _RN_MAGIC_WIDTH_RE = re.compile(r"""\bwidth\s*:\s*['"](?:48\.5|48|49|31|32)%['"]""")
 _RN_BREAKPOINT_RE = re.compile(r"""\bwidth\s*(?:>=|<)\s*\d+\b""")
 _CARD_TAG_RE = re.compile(r"""<Card\b""")
+_BRAND_CONTAINER_RE = re.compile(
+    r"""<(?P<tag>a|div|span)\b[^>]*class\s*=\s*['"][^'"]*\b(?:brand|logo|wordmark)\b[^'"]*['"][^>]*>[\s\S]*?</(?P=tag)>""",
+    re.IGNORECASE,
+)
+_HEADER_BLOCK_RE = re.compile(r"""<header\b[^>]*>[\s\S]*?</header>""", re.IGNORECASE)
+_INLINE_SVG_RE = re.compile(r"""<svg\b([^>]*)>([\s\S]*?)</svg>""", re.IGNORECASE)
+_SVG_DIM_RE = re.compile(r"""\b(?:width|height)\s*=\s*['"]?\s*(\d+)""", re.IGNORECASE)
+_HERO_SECTION_RE = re.compile(
+    r"""<section\b[^>]*(?:\bid\s*=\s*['"]hero['"]|\bclass\s*=\s*['"][^'"]*\bhero\b[^'"]*['"])[^>]*>[\s\S]*?</section>""",
+    re.IGNORECASE,
+)
+_RASTER_IMG_RE = re.compile(
+    r"""<img\b[^>]*\bsrc\s*=\s*['"][^'"]+\.(?:jpg|jpeg|webp|png|avif)(?:[?#][^'"]*)?['"]""",
+    re.IGNORECASE,
+)
+_COMPETING_RED_ACCENT_RE = re.compile(r"""(?:#9e2b1b|#bd3d1e|#dc2626|#b91c1c)\b""", re.IGNORECASE)
+_COMPETING_GREEN_ACCENT_RE = re.compile(r"""(?:#235334|#16a34a|#15803d|#059669)\b""", re.IGNORECASE)
+_WARM_LINEN_RE = re.compile(r"""(?:#faf7f2|#f4f1ea)\b""", re.IGNORECASE)
+_COLD_SLATE_HARMONY_RE = re.compile(r"""(?:#f8fafc|#e2e8f0|#0f172a)\b""", re.IGNORECASE)
 
 
 class _AnchorFormExtractor(HTMLParser):
@@ -261,6 +280,31 @@ def scan_target(
             if len(glass_hits) >= 2:
                 glino = text.count("\n", 0, glass_hits[0].start()) + 1
                 add_finding("SLOP-GLASS-01", "FINISH", fpath, glino, f"Excessive glassmorphism blur ({len(glass_hits)} heavy backdrop-filter blur rules >= 12px)", strict)
+            if not _is_palette_allowed("color-harmony", allowed_p):
+                red_m = _COMPETING_RED_ACCENT_RE.search(masked_text)
+                green_m = _COMPETING_GREEN_ACCENT_RE.search(masked_text)
+                linen_m = _WARM_LINEN_RE.search(masked_text)
+                cold_m = _COLD_SLATE_HARMONY_RE.search(masked_text)
+                if red_m and green_m:
+                    chlino = text.count("\n", 0, green_m.start()) + 1
+                    add_finding(
+                        "SLOP-COLOR-HARMONY-01",
+                        "FINISH",
+                        fpath,
+                        chlino,
+                        "Competing high-chroma red and green accents detected; commit to 1 restrained focal accent",
+                        strict,
+                    )
+                elif linen_m and cold_m:
+                    chlino = text.count("\n", 0, cold_m.start()) + 1
+                    add_finding(
+                        "SLOP-COLOR-HARMONY-01",
+                        "FINISH",
+                        fpath,
+                        chlino,
+                        "Warm linen mixed with cold slate neutrals; commit to 1 unified neutral hue temperature",
+                        strict,
+                    )
 
         if not _is_palette_allowed("cream-terracotta", allowed_p):
             cream_m = _WARM_CREAM_RE.search(masked_text)
@@ -299,6 +343,47 @@ def scan_target(
             if len(ficon_hits) >= 3:
                 filino = text.count("\n", 0, ficon_hits[2].start()) + 1
                 add_finding("SLOP-ICON-BOX-01", "FINISH", fpath, filino, f"Cookie-cutter icon-in-tinted-box feature pattern ({len(ficon_hits)} occurrences)", strict)
+
+            svg_logo_lines: set[int] = set()
+            for bm in _BRAND_CONTAINER_RE.finditer(masked_text):
+                if _INLINE_SVG_RE.search(bm.group(0)):
+                    svg_logo_lines.add(text.count("\n", 0, bm.start()) + 1)
+            for hm in _HEADER_BLOCK_RE.finditer(masked_text):
+                for svgm in _INLINE_SVG_RE.finditer(hm.group(0)):
+                    attrs, body = svgm.group(1), svgm.group(2)
+                    dims = [int(d) for d in _SVG_DIM_RE.findall(attrs)]
+                    is_primitive_logo = (max(dims) >= 24 if dims else False) or bool(
+                        re.search(r"<(?:rect|circle|polygon|ellipse)\b", body, re.IGNORECASE)
+                    )
+                    if is_primitive_logo:
+                        svg_logo_lines.add(text.count("\n", 0, hm.start() + svgm.start()) + 1)
+            for slino in sorted(svg_logo_lines):
+                add_finding(
+                    "SLOP-SVG-LOGO-01",
+                    "REFLEX",
+                    fpath,
+                    slino,
+                    "Hand-coded inline <svg> brand mark detected; use a crisp typographic wordmark or real raster emblem asset",
+                    True,
+                )
+
+            for hero_m in _HERO_SECTION_RE.finditer(masked_text):
+                hero_blob = hero_m.group(0)
+                hero_lino = text.count("\n", 0, hero_m.start()) + 1
+                has_raster_photo = bool(_RASTER_IMG_RE.search(hero_blob))
+                has_large_svg = False
+                for svgm in _INLINE_SVG_RE.finditer(hero_blob):
+                    dims = [int(d) for d in _SVG_DIM_RE.findall(svgm.group(1))]
+                    if dims and max(dims) >= 64:
+                        has_large_svg = True
+                        break
+                if has_large_svg or not has_raster_photo:
+                    detail = (
+                        "Large hand-drawn inline <svg> in hero section; replace with high-resolution editorial photography"
+                        if has_large_svg
+                        else "Hero section lacks real raster photography (<img> in .jpg/.webp/.png/.avif)"
+                    )
+                    add_finding("SLOP-HERO-NO-PHOTO", "REFLEX", fpath, hero_lino, detail, True)
 
         grid3_hits = list(_GRID_3COL_RE.finditer(masked_text))
         if len(grid3_hits) >= 2:
@@ -496,12 +581,15 @@ def run_self_test() -> dict[str, Any]:
         bad_css = td / "bad.css"
         bad_css.write_text(
             "body { font-family: 'Inter', sans-serif; --bg: #000000; background: #FFFBEB; color: #0F172A; }\n"
+            ":root { --accent: #9E2B1B; --herb: #235334; }\n"
             ".c { z-index: 9999; transition: all 200ms ease; backdrop-filter: blur(16px); }\n"
             ".d { backdrop-filter: blur(20px); } .phone-notch { width: 64px; }\n",
             encoding="utf-8",
         )
         bad_html = td / "bad.html"
         bad_html.write_text(
+            "<header><a class='wordmark'><svg width='28' height='28'><rect width='20' height='20'/></svg></a></header>\n"
+            "<section id='hero' class='hero'><h1>Title</h1><svg width='180' height='120'><circle cx='60' cy='60' r='50'/></svg></section>\n"
             "<span class='fresh-dot'></span><p>Val mAP@50 ONNX Runtime</p>\n"
             + "".join("<div class='card feature-icon'>x</div>" for _ in range(8)),
             encoding="utf-8",
@@ -543,8 +631,8 @@ def run_self_test() -> dict[str, Any]:
             and (not r_bad_html["passed"])
             and (not r_bad_tsx["passed"])
             and r_ok["passed"]
-            and {"SLOP-FONT-01", "SLOP-DARK-01", "SLOP-COLOR-CLASH-01", "SLOP-FAKE-DEVICE-01", "SLOP-ZIDX-01", "SLOP-MOTION-02", "SLOP-GLASS-01"}.issubset(rules_css)
-            and {"SLOP-DOT-01", "SLOP-COPY-02", "SLOP-WALL-CARDS-01", "SLOP-ICON-BOX-01"}.issubset(rules_html)
+            and {"SLOP-FONT-01", "SLOP-DARK-01", "SLOP-COLOR-CLASH-01", "SLOP-COLOR-HARMONY-01", "SLOP-FAKE-DEVICE-01", "SLOP-ZIDX-01", "SLOP-MOTION-02", "SLOP-GLASS-01"}.issubset(rules_css)
+            and {"SLOP-DOT-01", "SLOP-COPY-02", "SLOP-WALL-CARDS-01", "SLOP-ICON-BOX-01", "SLOP-SVG-LOGO-01", "SLOP-HERO-NO-PHOTO"}.issubset(rules_html)
             and {"SLOP-PALETTE-01", "SLOP-RN-LAYOUT-01", "SLOP-EYEBROW-01", "SLOP-EMOJI-01", "SLOP-COPY-01"}.issubset(rules_tsx)
         )
         return {

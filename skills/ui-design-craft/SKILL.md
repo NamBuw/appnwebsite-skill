@@ -66,6 +66,7 @@ Before introducing any styling framework, animation engine, or JS widget library
 - **Fonts:** Default ban on `Inter`, `Roboto`, `Arial`, `Open Sans`, and `Helvetica` (governed brownfield exception requires dated ADR + `--allow-font`).
 - **Icons:** Standardize on `Phosphor` (`@phosphor-icons/react`), `Solar`, or `Iconamoon`; ban `Lucide`, `Feather`, `Heroicons`, `Material Icons`, and `Material Symbols` by default (`--allow-icon` only with ADR).
 - **Surfaces & Stacking:** Flat intentional surfaces by default (hero text-only gradient with `background-clip: text` allowed); semantic z-index ladder `0..70` (`>= 999` banned); mandatory `@media (prefers-reduced-motion: reduce)`.
+- **Imagery, Brand Marks & Color Harmony:** Require real or art-directed raster photography (`<img>`/`<picture>`) in consumer/product heroes (`SLOP-HERO-NO-PHOTO`), ban hand-coded primitive inline `<svg>` logos in `.brand`/`.logo`/`.wordmark` (`SLOP-SVG-LOGO-01`), enforce 60-30-10 photography-coupled single-accent harmony (`SLOP-COLOR-HARMONY-01`), and inspect `1440px` + `390px` Playwright screenshots visually before release.
 - **Mandatory Gate Commands:**
 
 ```bash

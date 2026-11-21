@@ -16,6 +16,15 @@ Generic AI-generated interfaces fail immediately because they converge on identi
 | **Icons** | `Lucide`, `Feather`, `Heroicons`, `Material Icons`, `Material Symbols` | `Phosphor` (`@phosphor-icons/react`), `Solar`, `Iconamoon` (`@iconify/react`) | Dated brownfield ADR + `--allow-icon <pkg>` |
 | **Surfaces & Gradients** | Background gradients (`linear-gradient`/`radial-gradient` cards, AI purple/blue washes), 1-sided `.card` borders, `#0a0a0a` / `#121212` cliché darks | Flat intentional surfaces (`#09090B` / `#18181B` dark; `#FAFAFA` / `#FFFFFF` light); hero text-only directional gradient (`#FFFFFF -> #9B9B9B` or `#000000 -> #666666`) with `background-clip: text` | Explicit brand visual ADR in `design-master.md` |
 | **Stacking & Weights** | `z-index: 9999` (`>= 999`), `font-weight: 900`, italic UI labels, sun/moon theme toggles on fixed single-mode marketing pages | Semantic `--z-base..--z-tooltip` (`0..70`), weights `400–700`, native `<dialog>`/`popover` | `800` display only in `Kinetic`/`Bauhaus` site-kind |
+| **Hero Photography & Brand Mark** | Hero sections without real raster photography (`<img>`/`<picture>`), hand-drawn `<svg>` hero illustrations (`>= 64px`), or hand-coded primitive SVG block logos inside `.brand`/`.logo`/`.wordmark` | Art-directed high-res culinary/product/editorial photography (`WebP`/`AVIF`/`JPEG`) with consistent lighting; clean typographic wordmark or bespoke raster/exported brand emblem (`<img>`) | Pure developer CLI/code-editor tool hero showing a live interactive terminal/code frame in `software` site-kind |
+| **Color Harmony** | Mixing warm cream/linen with cold slate neutrals, or pairing competing high-chroma multi-accents (e.g., vivid red + forest green at equal visual weight) | **60-30-10 rule** locked to `1` unified neutral hue family (warm OR cool) and `1` restrained primary accent (`saturation < 70%`) sampled from the hero photography's color temperature | Semantic status badges only (small dotless labels for error/success in app UI, never competing marketing accents) |
+
+### Visual Assets, Photography & Brand Mark Craft (Hard Gate)
+
+1. **Real Hero Photography (`SLOP-HERO-NO-PHOTO`):** Consumer, food, product, service, and place landing pages MUST feature real high-resolution photography or art-directed generated studio imagery (`<img>`/`<picture>` in `.jpg`, `.webp`, `.png`, `.avif`) with unified lighting direction and color temperature. Ban hand-drawn inline `<svg>` hero scenes (`>= 64px`), empty typographic voids, and mismatched multi-source collages with clashing daylight vs studio lighting.
+2. **Zero Primitive SVG Block Logos (`SLOP-SVG-LOGO-01`):** Never ship hand-coded inline `<svg>` brand logos built from basic primitives (`<rect>`, `<circle>`, `<polygon>`, or crude `<path>` strokes) inside `.brand`, `.logo`, `.wordmark`, or `<header>`. Use either a disciplined typographic wordmark (tight tracking + refined weight) or a bespoke art-directed brand mark asset (`<img>`).
+3. **Photography-Coupled Color Harmony (`SLOP-COLOR-HARMONY-01`):** Derive the interface palette directly from the hero photograph's dominant warm/cool temperature: `60%` calm primary paper/canvas, `30%` tonal surface step, `10%` single focal accent (avoiding competing red+green multi-accent splits or mixing `#FAF7F2` linen with `#0F172A` cold slate).
+4. **Mandatory Playwright Visual Proof Gate:** Render desktop (`1440x900`) and mobile (`390x844`) Playwright screenshots (both light and dark themes if supported) and visually inspect every frame before shipping any landing page or UI redesign.
 
 ### Site-Kind Taxonomy & AI-Convergence Trap Filter
 
@@ -175,6 +184,9 @@ Anti-slop policy, icon/font rules, UX copy voice rules, and the `<= 5` waiver le
 - `SLOP-RN-LAYOUT-01` / `SLOP-CARD-NEST-01` (`REFLEX` / `FINISH`): RN magic widths (`48.5%`), `>= 3` inline `width >= ...` ternaries, or `>= 5` `<Card>` wrappers.
 - `SLOP-COPY-01` / `SLOP-COPY-02` (`FLOOR`): Placeholders (`Lorem ipsum`, `Jane Doe`, `Acme Corp`), AI buzzwords (`seamless`, `empower`, `robust`), or ML/infra jargon (`mAP@50`, `ECE`, `ONNX Runtime`, `CP-SAT`) in consumer HTML.
 - `SLOP-A11Y-01` / `SLOP-STRUCT-01` (`FLOOR`): Missing `prefers-reduced-motion` or dropped links/forms/handlers (`--before --kept`).
+- `SLOP-SVG-LOGO-01` (`REFLEX`): Hand-coded inline `<svg>` logo marks inside `.brand`/`.logo`/`.wordmark` or `<header>` logo slots (>= 24px).
+- `SLOP-HERO-NO-PHOTO` (`REFLEX`): `.hero` / `id="hero"` section missing real raster photography (`.jpg`/`.jpeg`/`.webp`/`.png`/`.avif`) or relying on large inline `<svg>` (`>= 64px`).
+- `SLOP-COLOR-HARMONY-01` (`FINISH`): Competing high-chroma red + green dual accents in CSS palette or mixing warm linen (`#FAF7F2`/`#F4F1EA`) with cold slate (`#0F172A`/`#F8FAFC`).
 
 ---
 
