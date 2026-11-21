@@ -48,6 +48,14 @@ AI_BUZZWORD_PATTERNS: tuple[str, ...] = (
     r"\bharness\s+the\s+power\b",
     r"\bworld-class\b",
     r"\btransform\s+your\s+workflow\b",
+    r"\bseamless(?:ly)?\b",
+    r"\bempower(?:ing)?\b",
+    r"\brobust\b",
+    r"\bdelve\b",
+    r"\bunlock\s+your\s+potential\b",
+    r"\belevate\s+your\b",
+    r"\bgame-chang(?:er|ing)\b",
+    r"\bstate-of-the-art\b",
 )
 
 _FONT_DECL_RE = re.compile(
@@ -61,6 +69,29 @@ _REDUCED_MOTION_RE = re.compile(r"prefers-reduced-motion", re.IGNORECASE)
 _ONE_SIDED_BORDER_RE = re.compile(r"\.card[^{]*\{[^}]*\bborder-(?:top|left|right|bottom)\s*:", re.IGNORECASE | re.DOTALL)
 _DEFAULT_EASE_RE = re.compile(r"\btransition\s*:[^;{}]*\b(?:ease|linear|ease-in-out)\b(?:\s*;|\s)", re.IGNORECASE)
 _SCROLL_LISTENER_RE = re.compile(r"window\.addEventListener\(\s*['\"]scroll['\"]", re.IGNORECASE)
+_PITCH_BLACK_BG_RE = re.compile(
+    r"""(?:--bg|background(?:-color)?|backgroundColor|\bbg)\s*:\s*['"]?#000(?:000)?(?:\b|['";,\s}])""",
+    re.IGNORECASE,
+)
+_INDIGO_SLOP_RE = re.compile(
+    r"""(?:#6366f1|#8b5cf6|#a855f7|\bbg-indigo-[56]00\b|\bfrom-indigo-|\bto-purple-|\bto-violet-)""",
+    re.IGNORECASE,
+)
+_WARM_CREAM_RE = re.compile(r"""(?:#fafaf8|#faf8f5|#fdfbf7|#f5f2eb)\b""", re.IGNORECASE)
+_TERRACOTTA_RE = re.compile(r"""(?:#d97757|#bd3d1e|#e05a34|#f28263|#c85a32)\b""", re.IGNORECASE)
+_THEME_TOGGLE_ID_RE = re.compile(r"""\bid\s*=\s*['"]theme-toggle['"]""", re.IGNORECASE)
+_GLASS_BLUR_RE = re.compile(r"""(?<!-)backdrop-filter\s*:\s*blur\(\s*(?:1[2-9]|[2-9]\d)px\s*\)""", re.IGNORECASE)
+_GRID_3COL_RE = re.compile(r"""(?:grid-template-columns\s*:\s*repeat\(\s*3\s*,|\bgrid-cols-3\b)""", re.IGNORECASE)
+_EYEBROW_MARK_RE = re.compile(r"""(?:class\s*=\s*['"][^'"]*eyebrow|\bv\s*=\s*['"]eyebrow['"])""", re.IGNORECASE)
+_PILL_BADGE_RE = re.compile(r"""(?:borderRadius\s*:\s*(?:radius\.pill|9999)|\brounded-full\b)""", re.IGNORECASE)
+_DECORATIVE_EMOJI_RE = re.compile(r"[✨🚀🔥⚡💡🎯🎉💎🤖]")
+_FAKE_PERSONA_RE = re.compile(r"""\b(?:Jane\s+Doe|John\s+Doe|Acme\s+Corp)\b""", re.IGNORECASE)
+_ML_JARGON_RE = re.compile(r"""(?:\bmAP@50\b|\bval\s+mAP\b|\bECE\b|\bCP\s+SAT\b|\bf1-score\b)""")
+_TRANSITION_ALL_RE = re.compile(r"""\btransition\s*:\s*all\b""", re.IGNORECASE)
+_INFINITE_ANIM_RE = re.compile(r"""\banimate-(?:bounce|ping)\b""", re.IGNORECASE)
+_RN_MAGIC_WIDTH_RE = re.compile(r"""\bwidth\s*:\s*['"](?:48\.5|48|49|31|32)%['"]""")
+_RN_BREAKPOINT_RE = re.compile(r"""\bwidth\s*(?:>=|<)\s*\d+\b""")
+_CARD_TAG_RE = re.compile(r"""<Card\b""")
 
 
 class _AnchorFormExtractor(HTMLParser):
@@ -162,10 +193,15 @@ def _extract_structural_markers(directory: Path) -> set[str]:
     return markers
 
 
+def _is_palette_allowed(family: str, allowed_p: set[str]) -> bool:
+    return "all" in allowed_p or family in allowed_p
+
+
 def scan_target(
     target: Path,
     allow_fonts: set[str] | None = None,
     allow_icons: set[str] | None = None,
+    allow_palettes: set[str] | None = None,
     strict: bool = False,
 ) -> dict[str, Any]:
     if not target.exists():
@@ -173,6 +209,7 @@ def scan_target(
 
     allowed_f = {f.lower() for f in (allow_fonts or set())}
     allowed_i = {i.lower() for i in (allow_icons or set())}
+    allowed_p = {p.lower() for p in (allow_palettes or set())}
     files = _collect_files(target)
     if not files:
         return {"passed": False, "error": f"No scannable UI files under {target}", "findings": []}
@@ -198,6 +235,8 @@ def scan_target(
         lines = text.splitlines()
         masked_lines = masked_text.splitlines()
         is_css = ext in (".css", ".scss")
+        is_html = ext in (".html", ".htm")
+        is_rn_tsx = ext in (".tsx", ".jsx")
         seen_font_findings: set[tuple[int, str]] = set()
 
         if is_css:
@@ -207,6 +246,56 @@ def scan_target(
                 css_has_reduced_motion = True
             if _ONE_SIDED_BORDER_RE.search(masked_text):
                 add_finding("SLOP-BORDER-01", "FINISH", fpath, 1, "Single-sided border on .card selector", strict)
+            glass_hits = list(_GLASS_BLUR_RE.finditer(masked_text))
+            if len(glass_hits) >= 2:
+                glino = text.count("\n", 0, glass_hits[0].start()) + 1
+                add_finding("SLOP-GLASS-01", "FINISH", fpath, glino, f"Excessive glassmorphism blur ({len(glass_hits)} heavy backdrop-filter blur rules >= 12px)", strict)
+
+        if not _is_palette_allowed("cream-terracotta", allowed_p):
+            cream_m = _WARM_CREAM_RE.search(masked_text)
+            terra_m = _TERRACOTTA_RE.search(masked_text)
+            if cream_m and terra_m:
+                plino = text.count("\n", 0, terra_m.start()) + 1
+                add_finding("SLOP-PALETTE-01", "REFLEX", fpath, plino, "AI-convergence cream+terracotta palette pair detected without ADR waiver", True)
+
+        if is_html:
+            toggle_m = _THEME_TOGGLE_ID_RE.search(masked_text)
+            if toggle_m or ("icon-sun" in masked_text and "icon-moon" in masked_text):
+                tlino = text.count("\n", 0, toggle_m.start()) + 1 if toggle_m else 1
+                add_finding("SLOP-TOGGLE-01", "REFLEX", fpath, tlino, "Sun/moon theme toggle clutter detected on marketing landing HTML", True)
+
+        grid3_hits = list(_GRID_3COL_RE.finditer(masked_text))
+        if len(grid3_hits) >= 2:
+            g3lino = text.count("\n", 0, grid3_hits[1].start()) + 1
+            add_finding("SLOP-GRID-01", "REFLEX", fpath, g3lino, f"Repetitive 3-equal-column card grid detected ({len(grid3_hits)} occurrences)", True)
+
+        eyebrow_hits = list(_EYEBROW_MARK_RE.finditer(masked_text))
+        if len(eyebrow_hits) >= 3:
+            elino = text.count("\n", 0, eyebrow_hits[2].start()) + 1
+            add_finding("SLOP-EYEBROW-01", "REFLEX", fpath, elino, f"Repetitive eyebrow label overload ({len(eyebrow_hits)} occurrences)", True)
+        else:
+            for eb in eyebrow_hits:
+                eb_line = text.count("\n", 0, eb.start()) + 1
+                win_start = max(0, eb_line - 6)
+                win_end = min(len(masked_lines), eb_line + 5)
+                if _PILL_BADGE_RE.search("\n".join(masked_lines[win_start:win_end])):
+                    add_finding("SLOP-EYEBROW-01", "REFLEX", fpath, eb_line, "Pill-shaped eyebrow badge cliché detected", True)
+                    break
+
+        if not is_css:
+            middots = [i + 1 for i, ml in enumerate(masked_lines) for _ in re.finditer("\u00b7", ml)]
+            if len(middots) >= 3:
+                add_finding("SLOP-EYEBROW-01", "REFLEX", fpath, middots[2], f"Mid-dot (·) metadata salad detected ({len(middots)} occurrences)", True)
+
+        if is_rn_tsx:
+            bp_hits = list(_RN_BREAKPOINT_RE.finditer(masked_text))
+            if len(bp_hits) >= 3:
+                blino = text.count("\n", 0, bp_hits[0].start()) + 1
+                add_finding("SLOP-RN-LAYOUT-01", "REFLEX", fpath, blino, f"Ad-hoc inline width breakpoint ternaries ({len(bp_hits)} checks); centralize responsive grid/container", True)
+            card_hits = list(_CARD_TAG_RE.finditer(masked_text))
+            if len(card_hits) >= 5:
+                clino = text.count("\n", 0, card_hits[4].start()) + 1
+                add_finding("SLOP-CARD-NEST-01", "FINISH", fpath, clino, f"Wall-of-cards layout ({len(card_hits)} <Card> wrappers in one screen)", strict)
 
         # Multi-line & single-line next/font/google import scan (comment-masked, exact line numbers)
         for imp_m in _NEXT_FONT_NAMED_RE.finditer(masked_text):
@@ -300,11 +389,33 @@ def scan_target(
                 if mm:
                     add_finding("SLOP-COPY-01", "FLOOR", fpath, lineno, f"AI slop / placeholder copy detected: {mm.group(0)!r}", True)
 
-            # 6. Default transition easing / unthrottled scroll
-            if is_css and _DEFAULT_EASE_RE.search(line):
+            # 6. Default transition easing / transition: all / infinite animations / unthrottled scroll
+            if is_css and _TRANSITION_ALL_RE.search(check_line):
+                add_finding("SLOP-MOTION-02", "REFLEX", fpath, lineno, "Wildcard transition: all detected; transition explicit GPU properties only", True)
+            if is_css and _DEFAULT_EASE_RE.search(check_line):
                 add_finding("SLOP-MOTION-01", "FINISH", fpath, lineno, "Generic default easing (ease/linear); prefer cubic-bezier(0.22,1,0.36,1)", strict)
-            if _SCROLL_LISTENER_RE.search(line):
+            if _INFINITE_ANIM_RE.search(check_line):
+                add_finding("SLOP-MOTION-02", "REFLEX", fpath, lineno, "Unjustified infinite attention animation (animate-bounce/ping) detected", True)
+            if _SCROLL_LISTENER_RE.search(check_line):
                 add_finding("SLOP-PERF-01", "FINISH", fpath, lineno, "Raw window scroll listener; prefer IntersectionObserver or CSS view timeline", strict)
+
+            # 7. Pitch-black dark backgrounds, indigo/violet defaults, decorative emojis, fake copy, RN magic widths
+            if _PITCH_BLACK_BG_RE.search(check_line):
+                add_finding("SLOP-DARK-01", "REFLEX", fpath, lineno, "Pure #000/#000000 dark background; use calibrated neutral (#09090B or #111113)", True)
+            if not _is_palette_allowed("indigo-violet", allowed_p) and _INDIGO_SLOP_RE.search(check_line):
+                add_finding("SLOP-PALETTE-01", "REFLEX", fpath, lineno, "Default indigo/violet SaaS cliché token detected", True)
+            em = _DECORATIVE_EMOJI_RE.search(check_line)
+            if em:
+                add_finding("SLOP-EMOJI-01", "REFLEX", fpath, lineno, f"Decorative UI emoji {em.group(0)!r} detected; use monoline SVG icon", True)
+            fp = _FAKE_PERSONA_RE.search(check_line)
+            if fp:
+                add_finding("SLOP-COPY-02", "FLOOR", fpath, lineno, f"Placeholder persona/company {fp.group(0)!r} detected", True)
+            if is_html:
+                mj = _ML_JARGON_RE.search(check_line)
+                if mj:
+                    add_finding("SLOP-COPY-02", "FLOOR", fpath, lineno, f"Internal ML/solver jargon {mj.group(0)!r} leaked into consumer HTML", True)
+            if is_rn_tsx and _RN_MAGIC_WIDTH_RE.search(check_line):
+                add_finding("SLOP-RN-LAYOUT-01", "REFLEX", fpath, lineno, "Magic fractional percentage width in React Native component; use flex/gap grid", True)
 
     if css_has_motion and not css_has_reduced_motion:
         css_files = [f for f in files if f.suffix.lower() in (".css", ".scss")]
@@ -347,19 +458,55 @@ def run_self_test() -> dict[str, Any]:
     with tempfile.TemporaryDirectory() as tmp:
         td = Path(tmp)
         bad_css = td / "bad.css"
-        bad_css.write_text("body { font-family: 'Inter', sans-serif; }\n.c { z-index: 9999; transition: all 200ms ease; }\n", encoding="utf-8")
+        bad_css.write_text(
+            "body { font-family: 'Inter', sans-serif; --bg: #000000; }\n"
+            ".c { z-index: 9999; transition: all 200ms ease; backdrop-filter: blur(16px); }\n"
+            ".d { backdrop-filter: blur(20px); }\n",
+            encoding="utf-8",
+        )
+        bad_tsx = td / "bad.tsx"
+        bad_tsx.write_text(
+            "const tokens = { bg: '#FAFAF8', accent: '#BD3D1E' };\n"
+            "export const X = () => (\n"
+            "  <View style={{ width: '48.5%', borderRadius: 9999 }}>\n"
+            "    <T v='eyebrow'>A · B · C · D</T>\n"
+            "    <Text>✨ Ship seamless robust magic</Text>\n"
+            "  </View>\n"
+            ");\n",
+            encoding="utf-8",
+        )
         clean_css = td / "clean" / "ok.css"
         clean_css.parent.mkdir()
         clean_css.write_text(
-            "body { font-family: 'Geist', sans-serif; }\n"
+            "body { font-family: 'Geist', sans-serif; background: #09090B; }\n"
             ".btn { transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1); }\n"
             "@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }\n",
             encoding="utf-8",
         )
-        r_bad = scan_target(bad_css)
-        r_ok = scan_target(clean_css.parent)
-        passed = (not r_bad["passed"]) and r_ok["passed"]
-        return {"passed": passed, "bad_findings": len(r_bad["findings"]), "clean_findings": len(r_ok["findings"])}
+        clean_tsx = td / "clean" / "ok.tsx"
+        clean_tsx.write_text(
+            "import { ArrowRight } from '@phosphor-icons/react';\n"
+            "export const Ok = () => <a href='#spec'>Inspect spec <ArrowRight aria-hidden='true' /></a>;\n",
+            encoding="utf-8",
+        )
+        r_bad_css = scan_target(bad_css, strict=True)
+        r_bad_tsx = scan_target(bad_tsx, strict=True)
+        r_ok = scan_target(clean_css.parent, strict=True)
+        rules_css = {f["rule"] for f in r_bad_css["findings"]}
+        rules_tsx = {f["rule"] for f in r_bad_tsx["findings"]}
+        passed = (
+            (not r_bad_css["passed"])
+            and (not r_bad_tsx["passed"])
+            and r_ok["passed"]
+            and {"SLOP-FONT-01", "SLOP-DARK-01", "SLOP-ZIDX-01", "SLOP-MOTION-02", "SLOP-GLASS-01"}.issubset(rules_css)
+            and {"SLOP-PALETTE-01", "SLOP-RN-LAYOUT-01", "SLOP-EYEBROW-01", "SLOP-EMOJI-01", "SLOP-COPY-01"}.issubset(rules_tsx)
+        )
+        return {
+            "passed": passed,
+            "bad_css_rules": sorted(rules_css),
+            "bad_tsx_rules": sorted(rules_tsx),
+            "clean_findings": len(r_ok["findings"]),
+        }
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -370,6 +517,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--path", "--dir", "--root", "--file", "--target", dest="opt_target", help="Target file or directory")
     parser.add_argument("--allow-font", action="append", default=[], help="Allowlist a font family (repeatable)")
     parser.add_argument("--allow-icon", action="append", default=[], help="Allowlist an icon package (repeatable)")
+    parser.add_argument("--allow-palette", action="append", default=[], help="Allowlist a palette rule (indigo-violet, cream-terracotta, all)")
     parser.add_argument("--strict", action="store_true", help="Fail on FINISH-tier findings as well as FLOOR/REFLEX")
     parser.add_argument("--before", type=str, default=None, help="Original UI directory for redesign retention check")
     parser.add_argument("--kept", type=str, default=None, help="Redesigned UI directory for redesign retention check")
@@ -410,6 +558,7 @@ def main(argv: list[str] | None = None) -> int:
         Path(target_str),
         allow_fonts=set(args.allow_font),
         allow_icons=set(args.allow_icon),
+        allow_palettes=set(args.allow_palette),
         strict=args.strict,
     )
     if args.json:

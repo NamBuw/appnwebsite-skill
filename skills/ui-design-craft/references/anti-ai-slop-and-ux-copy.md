@@ -26,11 +26,13 @@ Select the visual vernacular matching the product's real **Site-Kind** (`softwar
 4. Cookie-cutter 3-equal-card SaaS pricing/feature grids topped with pill badges and generic gradient blobs.
 5. Tracked `ALL-CAPS` eyebrow labels paired with `·` mid-dot metadata, `—` em-dashes, and `→` link arrows everywhere.
 
-### 3-Tier Anti-Slop Severity Model
+### 3-Tier Anti-Slop Severity Model & Taste Dials
 
-- **FLOOR (Hard Blockers):** Contrast `< 4.5:1` / `< 3.0:1`, horizontal overflow at `390px`, missing `prefers-reduced-motion`, placeholder copy (`Lorem ipsum`, `coming soon`, `Your headline here`), AI hype buzzwords, dropped links/handlers during redesign (`SLOP-STRUCT-01`).
-- **REFLEX (Default Craft Violations):** Banned fonts (`Inter`, `Roboto`, `Arial`, `Open Sans`, `Helvetica`), banned icon libraries (`Lucide`, `Feather`, `Heroicons`, `Material Icons`, `Material Symbols`), background gradients lacking `background-clip: text`, `z-index >= 999`.
-- **FINISH (Editorial Polish):** Single-sided card borders, generic `ease`/`linear` transitions instead of `cubic-bezier(0.22, 1, 0.36, 1)`, raw `scroll` listeners, unaligned microcopy verbs, off-scale spacing.
+Calibrate visual posture upfront with **3 Taste Dials** (`DESIGN_VARIANCE`: `1–10` asymmetry, `MOTION_INTENSITY`: `1–5` capped by **Motion Justification Rule** — every transition must state why it guides focus or clarifies state, `VISUAL_DENSITY`: `1–5` whitespace vs ledger density), and enforce the 3-tier severity gate:
+
+- **FLOOR (Hard Blockers):** Contrast `< 4.5:1` / `< 3.0:1`, horizontal overflow at `390px`, missing `prefers-reduced-motion`, placeholder copy (`Lorem ipsum`, `coming soon`, `Your headline here`, `Jane Doe`/`Acme Corp`), AI hype buzzwords (`seamless`, `empower`, `robust`, `delve`, `revolutionize`), raw ML/solver jargon (`mAP@50`, `ECE`, `CP SAT`) leaked into consumer landing HTML, dropped links/handlers during redesign (`SLOP-STRUCT-01`).
+- **REFLEX (Default Craft Violations):** Banned fonts (`Inter`, `Roboto`, `Arial`, `Open Sans`, `Helvetica`), banned icon libraries (`Lucide`, `Feather`, `Heroicons`, `Material Icons`, `Material Symbols`), decorative emojis (`✨`, `🚀`, `⚡`), pitch-black `#000000` backgrounds, AI-convergence palettes (Tailwind indigo/violet defaults or warm cream + terracotta without ADR), sun/moon theme toggles on marketing HTML, `>= 2` repetitive 3-col grids, eyebrow pill/`·` mid-dot salads, `transition: all` / `animate-bounce`, RN magic fractional widths (`48.5%`) / `>= 3` inline breakpoint ternaries, background gradients lacking `background-clip: text`, `z-index >= 999`.
+- **FINISH (Editorial Polish):** Single-sided card borders, excessive glassmorphism (`>= 2` heavy `backdrop-filter: blur(>=12px)` rules), wall-of-cards screens (`>= 5` `<Card>` wrappers), generic `ease`/`linear` transitions instead of `cubic-bezier(0.22, 1, 0.36, 1)`, raw `scroll` listeners, unaligned microcopy verbs, off-scale spacing.
 
 ### Token Economy & Simplest High-Craft Option (Anti-Overengineering Check)
 
@@ -158,13 +160,21 @@ Anti-slop policy, icon/font rules, UX copy voice rules, and the `<= 5` waiver le
 
 ### Deterministic Rule Catalog (`check_anti_slop.py`)
 
-- `SLOP-FONT-01` (`REFLEX`): Detects banned font families (`Inter`, `Roboto`, `Arial`, `Open Sans`, `Helvetica`) in CSS, JSX, or font loaders.
-- `SLOP-ICON-01` (`REFLEX`): Detects banned icon libraries (`Lucide`, `Feather`, `Heroicons`, `Material Icons`, `Material Symbols`).
-- `SLOP-GRAD-01` (`REFLEX`): Detects background gradients lacking hero `background-clip: text`.
-- `SLOP-ZIDX-01` (`REFLEX`): Detects out-of-scale `z-index >= 999` or negative stacking hacks.
-- `SLOP-COPY-01` (`FLOOR`): Detects `Lorem ipsum`, `coming soon`, and AI buzzword copy.
-- `SLOP-A11Y-01` (`FLOOR`): Detects CSS transitions/animations without `prefers-reduced-motion`.
-- `SLOP-STRUCT-01` (`FLOOR`): Detects dropped links, forms, handlers, or test IDs during redesign (`--before --kept`).
+- `SLOP-FONT-01` (`REFLEX`): Banned font families (`Inter`, `Roboto`, `Arial`, `Open Sans`, `Helvetica`) unless `--allow-font`.
+- `SLOP-ICON-01` (`REFLEX`): Banned icon libraries (`Lucide`, `Feather`, `Heroicons`, `Material Icons`, `Material Symbols`) unless `--allow-icon`.
+- `SLOP-EMOJI-01` (`REFLEX`): Decorative UI emojis (`✨`, `🚀`, `🔥`, `⚡`, `💡`, `🎯`, `🎉`, `💎`, `🤖`) replacing SVG icons.
+- `SLOP-DARK-01` (`REFLEX`): Pure pitch-black `#000`/`#000000` background tokens; use `#09090B` or `#111113`.
+- `SLOP-PALETTE-01` (`REFLEX`): Default indigo/violet (`#6366f1`, `bg-indigo-*`) or warm cream + terracotta pair unless `--allow-palette`.
+- `SLOP-GRAD-01` (`REFLEX`): Background gradients lacking hero `background-clip: text`.
+- `SLOP-GLASS-01` (`FINISH`): `>= 2` heavy `backdrop-filter: blur(>=12px)` glassmorphism panels in CSS/SCSS.
+- `SLOP-GRID-01` (`REFLEX`): `>= 2` repetitive 3-equal-column grids (`repeat(3, ...)` or `grid-cols-3`) in one file.
+- `SLOP-EYEBROW-01` (`REFLEX`): `>= 3` eyebrow markers, pill-shaped eyebrow badges, or `>= 3` `·` mid-dot metadata separators.
+- `SLOP-TOGGLE-01` (`REFLEX`): Sun/moon theme toggle controls (`#theme-toggle` / `icon-sun`+`icon-moon`) on marketing HTML.
+- `SLOP-ZIDX-01` (`REFLEX`): Out-of-scale `z-index >= 999` or negative stacking hacks.
+- `SLOP-MOTION-01` / `SLOP-MOTION-02` (`FINISH` / `REFLEX`): Generic `ease`/`linear` transitions, `transition: all`, or `animate-bounce`/`animate-ping`.
+- `SLOP-RN-LAYOUT-01` / `SLOP-CARD-NEST-01` (`REFLEX` / `FINISH`): RN magic widths (`48.5%`), `>= 3` inline `width >= ...` ternaries, or `>= 5` `<Card>` wrappers.
+- `SLOP-COPY-01` / `SLOP-COPY-02` (`FLOOR`): Placeholders (`Lorem ipsum`, `Jane Doe`, `Acme Corp`), AI buzzwords (`seamless`, `empower`, `robust`), or ML jargon (`mAP@50`, `ECE`) in consumer HTML.
+- `SLOP-A11Y-01` / `SLOP-STRUCT-01` (`FLOOR`): Missing `prefers-reduced-motion` or dropped links/forms/handlers (`--before --kept`).
 
 ---
 
