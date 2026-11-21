@@ -1,0 +1,12 @@
+{
+  "semantic": {
+    "a": {
+      "$value": "{semantic.b}",
+      "$type": "color"
+    },
+    "b": {
+      "$value": "{semantic.a}",
+      "$type": "color"
+    }
+  }
+}

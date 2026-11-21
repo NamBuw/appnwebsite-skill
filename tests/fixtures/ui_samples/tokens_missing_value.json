@@ -1,0 +1,12 @@
+{
+  "primitive": {
+    "color": {
+      "brand": {
+        "$type": "color"
+      },
+      "surface": {
+        "$value": "#ffffff"
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+body {
+  font-family: 'Inter', 'Roboto', 'Open Sans', sans-serif;
+  color: #777777;
+  background-color: #ffffff;
+}
+
+.sloppy-card {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  z-index: 9999;
+  transition: transform 300ms ease;
+}

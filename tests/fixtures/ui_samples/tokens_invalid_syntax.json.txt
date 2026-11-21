@@ -1,0 +1,4 @@
+{
+  "primitive": {
+    "color": {
+      "broken": { "$value": "#000000"

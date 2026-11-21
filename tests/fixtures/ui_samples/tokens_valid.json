@@ -1,0 +1,65 @@
+{
+  "$schema": "https://design-tokens.org/schemas/dtcg.json",
+  "primitive": {
+    "color": {
+      "zinc-950": {
+        "$value": "#09090b",
+        "$type": "color"
+      },
+      "zinc-900": {
+        "$value": "#18181b",
+        "$type": "color"
+      },
+      "zinc-50": {
+        "$value": "#fafafa",
+        "$type": "color"
+      },
+      "emerald-500": {
+        "$value": "#10b981",
+        "$type": "color"
+      }
+    },
+    "space": {
+      "4": {
+        "$value": "16px",
+        "$type": "dimension"
+      }
+    }
+  },
+  "semantic": {
+    "surface": {
+      "canvas": {
+        "$value": "{primitive.color.zinc-950}",
+        "$type": "color"
+      },
+      "elevated": {
+        "$value": "{primitive.color.zinc-900}",
+        "$type": "color"
+      }
+    },
+    "text": {
+      "primary": {
+        "$value": "{primitive.color.zinc-50}",
+        "$type": "color"
+      }
+    },
+    "accent": {
+      "primary": {
+        "$value": "{primitive.color.emerald-500}",
+        "$type": "color"
+      }
+    }
+  },
+  "component": {
+    "button": {
+      "primary-bg": {
+        "$value": "{semantic.accent.primary}",
+        "$type": "color"
+      },
+      "padding-x": {
+        "$value": "{primitive.space.4}",
+        "$type": "dimension"
+      }
+    }
+  }
+}

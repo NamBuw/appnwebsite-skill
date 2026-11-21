@@ -1,0 +1,18 @@
+{
+  "primitive": {
+    "color": {
+      "zinc-950": {
+        "$value": "#09090b",
+        "$type": "color"
+      }
+    }
+  },
+  "semantic": {
+    "text": {
+      "primary": {
+        "$value": "{primitive.color.does_not_exist}",
+        "$type": "color"
+      }
+    }
+  }
+}
