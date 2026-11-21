@@ -46,7 +46,8 @@ Static semantic markup achieves sub-second LCP, zero hydration blocking, and hig
 |---|---|---|
 | **Above-the-Fold Primary CTAs** | Exactly `1` primary CTA | Optional secondary link (`Watch 90s walkthrough`) is plain muted text, never a competing button |
 | **Hero Copy Measure** | `max-width: 680px` (`~65ch` body) | Prevent ultra-wide headlines that break visual scanning across `1440px` monitors |
-| **Outcome Benefits & Steps** | `3-5` benefits; `3` How-It-Works steps | Lead every item with buyer outcome, never raw implementation feature labels |
+| **Outcome Benefits & Rhythm** | `3-5` benefits; `< 4` card-grid bands | Lead with buyer outcome (zero ML jargon); alternate dark, paper, editorial & photo bands |
+| **Domain-Specific Hero Media** | Authentic photo or real product view | Fail **Domain-Interchangeability Test** if layout still fits B2B invoicing; ban CSS phone notches |
 | **FAQ Density** | `6-12` plain Q&A pairs | Cover pricing, setup time, migration, security, cancellation, and support |
 | **Responsive Breakpoints** | `320px`, `390x844`, `1440px` | `0 px` horizontal overflow; primary CTA visible above the fold on `390x844` |
 | **Core Web Vitals** | `LCP <= 2.5s`, `INP <= 200ms`, `CLS < 0.1` | Preload hero LCP asset (`fetchpriority="high"`); reserve explicit aspect boxes |
@@ -191,7 +192,7 @@ npx lighthouse http://127.0.0.1:3000 --only-categories=performance,accessibility
 | Pattern | Why It Fails | Detection Signal | Correct Replacement |
 |---|---|---|---|
 | **Dual Hero CTAs & Unrequested Eyebrow Pills** | Splits buyer attention above the fold and signals generic AI-generated SaaS templates | Two equally styled hero buttons or an ALL-CAPS pill badge above `<h1>` | Keep 1 primary verb+outcome CTA, plain text secondary link if needed, and clean `<h1>` |
-| **Three-Equal-Card SaaS Stereotype** | Identical white cards with `border + shadow` and centered icons look templated and hide hierarchy | Uniform 3-column grid of `rounded-xl border shadow-sm` boxes | Use asymmetric bento splits, zig-zag product bands, or open typographic grids |
+| **Three-Equal-Card & Fake-Device Slop** | Identical `.card` grids across every band and CSS-drawn phone notches look synthetic and domain-less | `>= 8` `.card` boxes, `.phone-notch`, or Tailwind `#FFFBEB`+`#0F172A` color clash | Alternate dark/editorial hairline bands with authentic domain photography; test domain swap |
 | **Invented Metrics & Round Demo Numbers** | Fabricated logos/quotes destroy trust; round placeholder numbers (`50%`, `100ms`) look synthetic | Unverified `%` claims without source or `Lorem ipsum` / round demo KPIs | Use `{{metric}}` / `{{testimonial}}` tokens for missing facts; use odd/decimal figures (`41.8%`) in demos |
 | **Scroll-Jacking & WebGL Globe Bloat** | Burns main-thread CPU, spikes INP/LCP, and breaks keyboard/trackpad scroll physics | `window.addEventListener('scroll', ...)` animations or 500 KB 3D canvas heroes | Use CSS + `< 30`-line `IntersectionObserver` (`transform`/`opacity`) + crisp UI screenshot |
 | **Soft-404 Catch-All & Ad-Page Indexing** | Wastes crawl budget, leaks paid-campaign variants into organic search, and confuses AI crawlers | Ad pages missing `noindex`, or `/[slug]` returning HTTP 200 for unknown slugs | Enforce `noindex` on campaign routes, `dynamicParams = false`, and explicit 404 responses |

@@ -86,7 +86,18 @@ _EYEBROW_MARK_RE = re.compile(r"""(?:class\s*=\s*['"][^'"]*eyebrow|\bv\s*=\s*['"
 _PILL_BADGE_RE = re.compile(r"""(?:borderRadius\s*:\s*(?:radius\.pill|9999)|\brounded-full\b)""", re.IGNORECASE)
 _DECORATIVE_EMOJI_RE = re.compile(r"[✨🚀🔥⚡💡🎯🎉💎🤖]")
 _FAKE_PERSONA_RE = re.compile(r"""\b(?:Jane\s+Doe|John\s+Doe|Acme\s+Corp)\b""", re.IGNORECASE)
-_ML_JARGON_RE = re.compile(r"""(?:\bmAP@50\b|\bval\s+mAP\b|\bECE\b|\bCP\s+SAT\b|\bf1-score\b)""")
+_ML_JARGON_RE = re.compile(
+    r"""(?:\bmAP@50\b|\bval\s+mAP\b|\bECE\b|\bCP[- ]SAT\b|\bf1-score\b|\bHeldout\s+OOD\b|\bONNX\s+Runtime\b|\bTemperature\s+Scaling\b|\bAES-256-GCM\b|\bWord2Vec\b|\bpgvector\b|\bNDCG@)"""
+)
+_FAKE_DEVICE_RE = re.compile(
+    r"""(?:\.(?:phone-notch|phone-frame|device-notch|browser-dots)\b|class\s*=\s*['"][^'"]*(?:phone-notch|device-notch|browser-dots))""",
+    re.IGNORECASE,
+)
+_HTML_CARD_CLASS_RE = re.compile(r"""class\s*=\s*['"][^'"]*\bcard\b""", re.IGNORECASE)
+_AMBER_WARM_RE = re.compile(r"""#fffbeb\b""", re.IGNORECASE)
+_SLATE_COLD_RE = re.compile(r"""(?:#0f172a|#475569)\b""", re.IGNORECASE)
+_DECOR_DOT_RE = re.compile(r"""class\s*=\s*['"][^'"]*\b(?:fresh-dot|status-dot|pulse-dot|live-dot)\b""", re.IGNORECASE)
+_FEATURE_ICON_BOX_RE = re.compile(r"""class\s*=\s*['"][^'"]*\bfeature-icon\b""", re.IGNORECASE)
 _TRANSITION_ALL_RE = re.compile(r"""\btransition\s*:\s*all\b""", re.IGNORECASE)
 _INFINITE_ANIM_RE = re.compile(r"""\banimate-(?:bounce|ping)\b""", re.IGNORECASE)
 _RN_MAGIC_WIDTH_RE = re.compile(r"""\bwidth\s*:\s*['"](?:48\.5|48|49|31|32)%['"]""")
@@ -258,11 +269,36 @@ def scan_target(
                 plino = text.count("\n", 0, terra_m.start()) + 1
                 add_finding("SLOP-PALETTE-01", "REFLEX", fpath, plino, "AI-convergence cream+terracotta palette pair detected without ADR waiver", True)
 
+        if not _is_palette_allowed("amber-slate", allowed_p):
+            amber_m = _AMBER_WARM_RE.search(masked_text)
+            slate_m = _SLATE_COLD_RE.search(masked_text)
+            if amber_m and slate_m:
+                clino = text.count("\n", 0, slate_m.start()) + 1
+                add_finding("SLOP-COLOR-CLASH-01", "REFLEX", fpath, clino, "Tailwind warm #FFFBEB + cold slate (#0F172A/#475569) temperature clash", True)
+
+        if is_css or is_html:
+            fake_dev = _FAKE_DEVICE_RE.search(masked_text)
+            if fake_dev:
+                dlino = text.count("\n", 0, fake_dev.start()) + 1
+                add_finding("SLOP-FAKE-DEVICE-01", "REFLEX", fpath, dlino, "CSS-drawn fake phone/browser notch mockup detected; use real screenshot/photography", True)
+
         if is_html:
             toggle_m = _THEME_TOGGLE_ID_RE.search(masked_text)
             if toggle_m or ("icon-sun" in masked_text and "icon-moon" in masked_text):
                 tlino = text.count("\n", 0, toggle_m.start()) + 1 if toggle_m else 1
                 add_finding("SLOP-TOGGLE-01", "REFLEX", fpath, tlino, "Sun/moon theme toggle clutter detected on marketing landing HTML", True)
+            dot_m = _DECOR_DOT_RE.search(masked_text)
+            if dot_m:
+                dotlino = text.count("\n", 0, dot_m.start()) + 1
+                add_finding("SLOP-DOT-01", "REFLEX", fpath, dotlino, "Decorative status/live dot chrome detected in landing HTML", True)
+            card_cls_hits = list(_HTML_CARD_CLASS_RE.finditer(masked_text))
+            if len(card_cls_hits) >= 8:
+                wclino = text.count("\n", 0, card_cls_hits[7].start()) + 1
+                add_finding("SLOP-WALL-CARDS-01", "REFLEX", fpath, wclino, f"Wall-of-cards layout monotony ({len(card_cls_hits)} .card containers in one HTML page)", True)
+            ficon_hits = list(_FEATURE_ICON_BOX_RE.finditer(masked_text))
+            if len(ficon_hits) >= 3:
+                filino = text.count("\n", 0, ficon_hits[2].start()) + 1
+                add_finding("SLOP-ICON-BOX-01", "FINISH", fpath, filino, f"Cookie-cutter icon-in-tinted-box feature pattern ({len(ficon_hits)} occurrences)", strict)
 
         grid3_hits = list(_GRID_3COL_RE.finditer(masked_text))
         if len(grid3_hits) >= 2:
@@ -459,9 +495,15 @@ def run_self_test() -> dict[str, Any]:
         td = Path(tmp)
         bad_css = td / "bad.css"
         bad_css.write_text(
-            "body { font-family: 'Inter', sans-serif; --bg: #000000; }\n"
+            "body { font-family: 'Inter', sans-serif; --bg: #000000; background: #FFFBEB; color: #0F172A; }\n"
             ".c { z-index: 9999; transition: all 200ms ease; backdrop-filter: blur(16px); }\n"
-            ".d { backdrop-filter: blur(20px); }\n",
+            ".d { backdrop-filter: blur(20px); } .phone-notch { width: 64px; }\n",
+            encoding="utf-8",
+        )
+        bad_html = td / "bad.html"
+        bad_html.write_text(
+            "<span class='fresh-dot'></span><p>Val mAP@50 ONNX Runtime</p>\n"
+            + "".join("<div class='card feature-icon'>x</div>" for _ in range(8)),
             encoding="utf-8",
         )
         bad_tsx = td / "bad.tsx"
@@ -490,20 +532,25 @@ def run_self_test() -> dict[str, Any]:
             encoding="utf-8",
         )
         r_bad_css = scan_target(bad_css, strict=True)
+        r_bad_html = scan_target(bad_html, strict=True)
         r_bad_tsx = scan_target(bad_tsx, strict=True)
         r_ok = scan_target(clean_css.parent, strict=True)
         rules_css = {f["rule"] for f in r_bad_css["findings"]}
+        rules_html = {f["rule"] for f in r_bad_html["findings"]}
         rules_tsx = {f["rule"] for f in r_bad_tsx["findings"]}
         passed = (
             (not r_bad_css["passed"])
+            and (not r_bad_html["passed"])
             and (not r_bad_tsx["passed"])
             and r_ok["passed"]
-            and {"SLOP-FONT-01", "SLOP-DARK-01", "SLOP-ZIDX-01", "SLOP-MOTION-02", "SLOP-GLASS-01"}.issubset(rules_css)
+            and {"SLOP-FONT-01", "SLOP-DARK-01", "SLOP-COLOR-CLASH-01", "SLOP-FAKE-DEVICE-01", "SLOP-ZIDX-01", "SLOP-MOTION-02", "SLOP-GLASS-01"}.issubset(rules_css)
+            and {"SLOP-DOT-01", "SLOP-COPY-02", "SLOP-WALL-CARDS-01", "SLOP-ICON-BOX-01"}.issubset(rules_html)
             and {"SLOP-PALETTE-01", "SLOP-RN-LAYOUT-01", "SLOP-EYEBROW-01", "SLOP-EMOJI-01", "SLOP-COPY-01"}.issubset(rules_tsx)
         )
         return {
             "passed": passed,
             "bad_css_rules": sorted(rules_css),
+            "bad_html_rules": sorted(rules_html),
             "bad_tsx_rules": sorted(rules_tsx),
             "clean_findings": len(r_ok["findings"]),
         }

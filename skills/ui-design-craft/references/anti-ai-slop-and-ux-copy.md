@@ -19,12 +19,12 @@ Generic AI-generated interfaces fail immediately because they converge on identi
 
 ### Site-Kind Taxonomy & AI-Convergence Trap Filter
 
-Select the visual vernacular matching the product's real **Site-Kind** (`software`, `gaming`, `tech`, `product`, `service`, `place`) while actively avoiding the **5 AI-Convergence Traps**:
+- **Site-Kind & Domain-Interchangeability Test:** Match visual vernacular to real **Site-Kind** (`software`, `gaming`, `tech`, `product`, `service`, `place`). **Hard Rule:** If replacing copy with B2B invoicing leaves the layout and visuals coherent, the design is domain-less AI slop -> **FAIL**. Avoid the **5 AI-Convergence Traps**:
 1. Warm cream canvas paired exclusively with `#D97757` terracotta accents.
 2. Near-black backgrounds paired with acid-green or vermilion highlights without domain rationale.
 3. Broadsheet 1px hairline grids applied indiscriminately to casual consumer tools.
-4. Cookie-cutter 3-equal-card SaaS pricing/feature grids topped with pill badges and generic gradient blobs.
-5. Tracked `ALL-CAPS` eyebrow labels paired with `·` mid-dot metadata, `—` em-dashes, and `→` link arrows everywhere.
+4. Cookie-cutter 3-equal-card grids, wall-of-cards (`>= 8` `.card` boxes), CSS-drawn fake phone/notch mockups, or decorative status dots.
+5. Tracked `ALL-CAPS` eyebrow pill badges paired with `·` mid-dot metadata, `—` em-dashes, and `→` arrows everywhere.
 
 ### 3-Tier Anti-Slop Severity Model & Taste Dials
 
@@ -163,17 +163,17 @@ Anti-slop policy, icon/font rules, UX copy voice rules, and the `<= 5` waiver le
 - `SLOP-FONT-01` (`REFLEX`): Banned font families (`Inter`, `Roboto`, `Arial`, `Open Sans`, `Helvetica`) unless `--allow-font`.
 - `SLOP-ICON-01` (`REFLEX`): Banned icon libraries (`Lucide`, `Feather`, `Heroicons`, `Material Icons`, `Material Symbols`) unless `--allow-icon`.
 - `SLOP-EMOJI-01` (`REFLEX`): Decorative UI emojis (`✨`, `🚀`, `🔥`, `⚡`, `💡`, `🎯`, `🎉`, `💎`, `🤖`) replacing SVG icons.
-- `SLOP-DARK-01` (`REFLEX`): Pure pitch-black `#000`/`#000000` background tokens; use `#09090B` or `#111113`.
+- `SLOP-DARK-01` / `SLOP-COLOR-CLASH-01` (`REFLEX`): Pure `#000`/`#000000` backgrounds or Tailwind warm `#FFFBEB` + cold `#0F172A`/`#475569` clash.
 - `SLOP-PALETTE-01` (`REFLEX`): Default indigo/violet (`#6366f1`, `bg-indigo-*`) or warm cream + terracotta pair unless `--allow-palette`.
-- `SLOP-GRAD-01` (`REFLEX`): Background gradients lacking hero `background-clip: text`.
-- `SLOP-GLASS-01` (`FINISH`): `>= 2` heavy `backdrop-filter: blur(>=12px)` glassmorphism panels in CSS/SCSS.
-- `SLOP-GRID-01` (`REFLEX`): `>= 2` repetitive 3-equal-column grids (`repeat(3, ...)` or `grid-cols-3`) in one file.
-- `SLOP-EYEBROW-01` (`REFLEX`): `>= 3` eyebrow markers, pill-shaped eyebrow badges, or `>= 3` `·` mid-dot metadata separators.
+- `SLOP-GRAD-01` / `SLOP-FAKE-DEVICE-01` (`REFLEX`): Unclipped background gradients or CSS-drawn fake `.phone-notch`/`.browser-dots` mockups.
+- `SLOP-GLASS-01` / `SLOP-ICON-BOX-01` (`FINISH`): `>= 2` heavy `backdrop-filter: blur(>=12px)` panels or `>= 3` `.feature-icon` square boxes.
+- `SLOP-GRID-01` / `SLOP-WALL-CARDS-01` (`REFLEX`): `>= 2` repetitive `repeat(3, ...)`/`grid-cols-3` grids or `>= 8` `.card` wrappers in HTML.
+- `SLOP-EYEBROW-01` / `SLOP-DOT-01` (`REFLEX`): `>= 3` eyebrow markers, pill eyebrows, `·` mid-dot salad, or decorative `.fresh-dot`/`.pulse-dot` spans.
 - `SLOP-TOGGLE-01` (`REFLEX`): Sun/moon theme toggle controls (`#theme-toggle` / `icon-sun`+`icon-moon`) on marketing HTML.
 - `SLOP-ZIDX-01` (`REFLEX`): Out-of-scale `z-index >= 999` or negative stacking hacks.
 - `SLOP-MOTION-01` / `SLOP-MOTION-02` (`FINISH` / `REFLEX`): Generic `ease`/`linear` transitions, `transition: all`, or `animate-bounce`/`animate-ping`.
 - `SLOP-RN-LAYOUT-01` / `SLOP-CARD-NEST-01` (`REFLEX` / `FINISH`): RN magic widths (`48.5%`), `>= 3` inline `width >= ...` ternaries, or `>= 5` `<Card>` wrappers.
-- `SLOP-COPY-01` / `SLOP-COPY-02` (`FLOOR`): Placeholders (`Lorem ipsum`, `Jane Doe`, `Acme Corp`), AI buzzwords (`seamless`, `empower`, `robust`), or ML jargon (`mAP@50`, `ECE`) in consumer HTML.
+- `SLOP-COPY-01` / `SLOP-COPY-02` (`FLOOR`): Placeholders (`Lorem ipsum`, `Jane Doe`, `Acme Corp`), AI buzzwords (`seamless`, `empower`, `robust`), or ML/infra jargon (`mAP@50`, `ECE`, `ONNX Runtime`, `CP-SAT`) in consumer HTML.
 - `SLOP-A11Y-01` / `SLOP-STRUCT-01` (`FLOOR`): Missing `prefers-reduced-motion` or dropped links/forms/handlers (`--before --kept`).
 
 ---
