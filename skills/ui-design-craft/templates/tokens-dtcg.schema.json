@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/NamBuw/appnwebsite-skill/schemas/tokens-dtcg.schema.json",
+  "title": "W3C DTCG 3-Tier Design Tokens Schema",
+  "description": "Validates 3-tier (primitive -> semantic -> component) W3C Design Tokens Community Group JSON files.",
+  "type": "object",
+  "additionalProperties": false,
+  "minProperties": 1,
+  "properties": {
+    "$schema": { "type": "string" },
+    "$description": { "type": "string" },
+    "$type": { "$ref": "#/$defs/tokenType" },
+    "$extensions": { "type": "object" },
+    "primitive": { "$ref": "#/$defs/tokenGroup" },
+    "semantic": { "$ref": "#/$defs/tokenGroup" },
+    "component": { "$ref": "#/$defs/tokenGroup" },
+    "modes": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/tokenGroup" }
+    }
+  },
+  "patternProperties": {
+    "^(?!\\$)(?!primitive$)(?!semantic$)(?!component$)(?!modes$)[a-zA-Z0-9_.-]+$": {
+      "$ref": "#/$defs/tokenOrGroup"
+    }
+  },
+  "$defs": {
+    "tokenType": {
+      "type": "string",
+      "enum": [
+        "color",
+        "dimension",
+        "fontFamily",
+        "fontWeight",
+        "duration",
+        "cubicBezier",
+        "number",
+        "shadow",
+        "typography",
+        "border",
+        "strokeStyle",
+        "transition",
+        "gradient"
+      ]
+    },
+    "aliasRef": {
+      "type": "string",
+      "pattern": "^\\{[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)+\\}$"
+    },
+    "tokenNode": {
+      "type": "object",
+      "required": ["$value"],
+      "additionalProperties": false,
+      "properties": {
+        "$value": {
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            { "type": "number" },
+            { "type": "array" },
+            { "type": "object" }
+          ]
+        },
+        "$type": { "$ref": "#/$defs/tokenType" },
+        "$description": { "type": "string" },
+        "$extensions": { "type": "object" }
+      }
+    },
+    "tokenGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "not": {
+        "propertyNames": { "pattern": "^\\$" }
+      },
+      "properties": {
+        "$type": { "$ref": "#/$defs/tokenType" },
+        "$description": { "type": "string" },
+        "$extensions": { "type": "object" }
+      },
+      "patternProperties": {
+        "^[^$][a-zA-Z0-9_.-]*$": { "$ref": "#/$defs/tokenOrGroup" }
+      }
+    },
+    "tokenOrGroup": {
+      "oneOf": [
+        { "$ref": "#/$defs/tokenNode" },
+        { "$ref": "#/$defs/tokenGroup" }
+      ]
+    }
+  }
+}
