@@ -90,6 +90,11 @@ _INDIGO_SLOP_RE = re.compile(
 _WARM_CREAM_RE = re.compile(r"""(?:#fafaf8|#faf8f5|#fdfbf7|#f5f2eb)\b""", re.IGNORECASE)
 _TERRACOTTA_RE = re.compile(r"""(?:#d97757|#bd3d1e|#e05a34|#f28263|#c85a32)\b""", re.IGNORECASE)
 _THEME_TOGGLE_ID_RE = re.compile(r"""\bid\s*=\s*['"]theme-toggle['"]""", re.IGNORECASE)
+_THEME_SWITCH_CONTROL_RE = re.compile(
+    r"""(?:data-testid\s*=\s*['"]theme-toggle['"]|testID\s*=\s*['"]theme-toggle['"]|<ThemeToggle\b|class\s*=\s*['"][^'"]*\bmode-switch\b)""",
+    re.IGNORECASE,
+)
+_PRIMITIVE_SHAPE_RE = re.compile(r"""<(?:circle|ellipse|rect)\b""", re.IGNORECASE)
 _GLASS_BLUR_RE = re.compile(r"""(?<!-)backdrop-filter\s*:\s*blur\(\s*(?:1[2-9]|[2-9]\d)px\s*\)""", re.IGNORECASE)
 _GRID_3COL_RE = re.compile(r"""(?:grid-template-columns\s*:\s*repeat\(\s*3\s*,|\bgrid-cols-3\b)""", re.IGNORECASE)
 _EYEBROW_MARK_RE = re.compile(r"""(?:class\s*=\s*['"][^'"]*eyebrow|\bv\s*=\s*['"]eyebrow['"])""", re.IGNORECASE)
@@ -428,6 +433,33 @@ def scan_target(
                 clino = text.count("\n", 0, card_hits[4].start()) + 1
                 add_finding("SLOP-CARD-NEST-01", "FINISH", fpath, clino, f"Wall-of-cards layout ({len(card_hits)} <Card> wrappers in one screen)", strict)
 
+        if is_html or is_rn_tsx:
+            tsw_m = _THEME_SWITCH_CONTROL_RE.search(masked_text)
+            if tsw_m:
+                tswlino = text.count("\n", 0, tsw_m.start()) + 1
+                add_finding(
+                    "SLOP-THEME-SWITCH-01",
+                    "REFLEX",
+                    fpath,
+                    tswlino,
+                    "Manual theme-toggle button detected; follow OS prefers-color-scheme / useColorScheme() unless explicitly requested",
+                    True,
+                )
+            for svgm in _INLINE_SVG_RE.finditer(masked_text):
+                attrs, body = svgm.group(1), svgm.group(2)
+                if re.search(r"\b(?:chart|sparkline|recharts)\b", attrs, re.IGNORECASE):
+                    continue
+                if len(_PRIMITIVE_SHAPE_RE.findall(body)) >= 6:
+                    slino = text.count("\n", 0, svgm.start()) + 1
+                    add_finding(
+                        "SLOP-SVG-ART-01",
+                        "REFLEX",
+                        fpath,
+                        slino,
+                        "Multi-shape hand-coded SVG art/illustration (>= 6 primitives); use real curated photography or crisp minimal typography",
+                        True,
+                    )
+
         # Multi-line & single-line next/font/google import scan (comment-masked, exact line numbers)
         for imp_m in _NEXT_FONT_NAMED_RE.finditer(masked_text):
             body = imp_m.group(1)
@@ -610,8 +642,11 @@ def run_self_test() -> dict[str, Any]:
         )
         bad_html = td / "bad.html"
         bad_html.write_text(
-            "<header><a class='wordmark'><svg width='28' height='28'><rect width='20' height='20'/></svg></a></header>\n"
-            "<section id='hero' class='hero'><h1>Title</h1><svg width='180' height='120'><circle cx='60' cy='60' r='50'/></svg></section>\n"
+            "<header><a class='wordmark'><svg width='28' height='28'><rect width='20' height='20'/></svg></a>"
+            "<button class='mode-switch' data-testid='theme-toggle'>Dark</button></header>\n"
+            "<section id='hero' class='hero'><h1>Title</h1><svg width='180' height='120'>"
+            + "".join("<circle cx='60' cy='60' r='10'/>" for _ in range(6))
+            + "</svg></section>\n"
             "<span class='fresh-dot'></span><p>Val mAP@50 ONNX Runtime · midjourney ai-generated</p>\n"
             + "".join("<div class='card feature-icon'>x</div>" for _ in range(8)),
             encoding="utf-8",
@@ -621,6 +656,10 @@ def run_self_test() -> dict[str, Any]:
             "const tokens = { bg: '#FAFAF8', accent: '#BD3D1E' };\n"
             "export const X = () => (\n"
             "  <View style={{ width: '48.5%', borderRadius: 9999 }}>\n"
+            "    <ThemeToggle testID='theme-toggle' />\n"
+            "    <Svg width={100} height={100}>"
+            + "".join("<Circle cx='10' cy='10' r='5' />" for _ in range(6))
+            + "</Svg>\n"
             "    <T v='eyebrow'>A · B · C · D</T>\n"
             "    <Text>✨ Ship seamless robust magic</Text>\n"
             "  </View>\n"
@@ -655,8 +694,8 @@ def run_self_test() -> dict[str, Any]:
             and (not r_bad_tsx["passed"])
             and r_ok["passed"]
             and {"SLOP-FONT-01", "SLOP-DARK-01", "SLOP-COLOR-CLASH-01", "SLOP-COLOR-HARMONY-01", "SLOP-FAKE-DEVICE-01", "SLOP-ZIDX-01", "SLOP-MOTION-02", "SLOP-GLASS-01"}.issubset(rules_css)
-            and {"SLOP-DOT-01", "SLOP-COPY-02", "SLOP-WALL-CARDS-01", "SLOP-ICON-BOX-01", "SLOP-SVG-LOGO-01", "SLOP-HERO-NO-PHOTO", "SLOP-AI-IMAGE-01"}.issubset(rules_html)
-            and {"SLOP-PALETTE-01", "SLOP-RN-LAYOUT-01", "SLOP-EYEBROW-01", "SLOP-EMOJI-01", "SLOP-COPY-01"}.issubset(rules_tsx)
+            and {"SLOP-DOT-01", "SLOP-COPY-02", "SLOP-WALL-CARDS-01", "SLOP-ICON-BOX-01", "SLOP-SVG-LOGO-01", "SLOP-HERO-NO-PHOTO", "SLOP-AI-IMAGE-01", "SLOP-THEME-SWITCH-01", "SLOP-SVG-ART-01"}.issubset(rules_html)
+            and {"SLOP-PALETTE-01", "SLOP-RN-LAYOUT-01", "SLOP-EYEBROW-01", "SLOP-EMOJI-01", "SLOP-COPY-01", "SLOP-THEME-SWITCH-01", "SLOP-SVG-ART-01"}.issubset(rules_tsx)
         )
         return {
             "passed": passed,
